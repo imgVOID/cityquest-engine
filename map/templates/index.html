@@ -1,0 +1,154 @@
+{% load leaflet_tags %}
+{% load static from staticfiles %}
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    {% leaflet_js %}
+    {% leaflet_css %}
+    {% leaflet_js  plugins="fullscreen,buttons,sidebar" %}
+    {% leaflet_css plugins="fullscreen,buttons,sidebar" %}
+    <style>
+      html, body, .leaflet-container { height: 100%; width: 100vw; }
+      body {padding: 0; margin: 0;}
+      .user {position: absolute;bottom:0;right:0;z-index:999999999;background-color:white}
+      .locate {margin-left:-0.04em !important; margin-top:0.43em !important; width: 1.25em;height:1.25em; text-align: center}
+      .close {z-index: 999999}
+    </style>
+    <script type="text/javascript">
+    
+    var LeafIcon = L.Icon.extend({
+    options: {
+        shadowUrl: '',
+        iconSize:     [40, 40],
+        shadowSize:   [50, 64],
+        iconAnchor:   [10, 10],
+        shadowAnchor: [4, 62],
+        popupAnchor:  [0, 0]
+    }
+    });
+
+      var dataurl = '{% url "data" %}';
+      var pointurl = '{% url "point" %}';
+      window.addEventListener("map:init", function (event) {
+        var map = event.detail.map;
+        map.addControl(new L.Control.Fullscreen());
+        function onLocationFound(e) {
+            var radius = e.accuracy/2;
+            L.circle(e.latlng, radius).addTo(map).bindPopup("You are here");
+        }
+
+        function onLocationError(e) {
+            alert(e.message);
+        }
+
+        map.on('locationfound', onLocationFound);
+        map.on('locationerror', onLocationError);
+
+        L.easyButton('<img class="locate" src="{%static 'images/user.png'%}">', function(btn, map){
+          var content = `<button id="closeButton">close</button><br><br><h3>{{ user.get_username }}</h3><p>{{group}}</p>`;
+          sidebar.show();
+          sidebar.setContent(content);
+          document.getElementById("closeButton").onclick = hideSidebar;
+        }).addTo(map);
+        
+        L.easyButton('<img class="locate" src="{%static 'images/locate.png'%}">', function(btn, map){
+          map.locate({setView: true, maxZoom: 13});
+        }).addTo(map);
+        
+        var sidebar = L.control.sidebar('sidebar', {
+          closebutton: true,
+          position: 'right'
+        });
+
+        map.addControl(sidebar);
+        
+        function hideSidebar(){
+          sidebar.hide();
+        }
+        
+        // Download GeoJSON data with Ajax
+        fetch(dataurl)
+          .then(function(resp) {
+            return resp.json();
+          })
+          .then(function(data) {
+            var color = "";
+            function levelFilter(feature){
+                if (feature.properties.num == {{group}}) return true
+            }
+            L.geoJson(data, 
+            {
+              filter: levelFilter,
+              onEachFeature: function onEachFeature(feature, layer) {
+                var content = `<button id="closeButton">close</button><br><br><img width="100" height="50" src="${feature.properties.picture}"/><h3>${feature.properties.title}</h3><p>${feature.properties.description}</p>`;
+                long = feature.geometry.coordinates[0][0][0];
+                lat = feature.geometry.coordinates[0][0][1];
+                map.flyTo([lat, long]);
+                L.easyButton('<img class="locate" src="{%static 'images/toquest.png'%}">', function(btn, map){
+                  map.flyTo([lat, long]);
+                }).addTo(map);
+                layer.on('click', function(){
+                  sidebar.show();
+                  sidebar.setContent(content);
+                  document.getElementById("closeButton").onclick = hideSidebar;
+                });
+                color = feature.properties.color;
+                
+                
+              },
+              style: function(feature) {
+              return {"color":feature.properties.color}
+              }
+            }).addTo(map);
+          });
+        fetch(pointurl)
+          .then(function(resp) {
+            return resp.json();
+          })
+          .then(function(data) {
+            function levelFilter(feature){
+                if (feature.properties.num < {{group}}) return true
+            }
+            L.geoJson(data,{filter: levelFilter,
+              onEachFeature: function onEachFeature(feature, layer) {
+                var content = `<button id="closeButton">close</button><br><br><img width="100" height="50" src="${feature.properties.picture_url}"/><h3>${feature.properties.title}</h3><p>${feature.properties.description}</p>`;
+                layer.on('click', function(){
+                  sidebar.show();
+                  sidebar.setContent(content);
+                  document.getElementById("closeButton").onclick = hideSidebar;
+                });
+              },
+              pointToLayer: function (feature, latlng) {
+                return L.marker(latlng, { icon: new LeafIcon({iconUrl: feature.properties.icon})});
+              }
+            }).addTo(map);
+          });
+          function func()
+	{
+	    setTimeout( 2000); // Задержка 2 секунды, для примера.
+	}
+      });
+      
+     
+    </script>
+  </head>
+  <body>
+    {% leaflet_map "main" %}
+    {% if user.is_authenticated %}
+    <div class="user">{{ user.get_username }} {{group}} 
+    <a href="{% url 'level1complete' %}">ToLevel2</a> 
+    <a href="{% url 'level2complete' %}">ToLevel3</a> 
+    <a href="{% url 'testreset' %}">Restart</a>
+    
+    </div>
+    {% else %}
+    <div class="user"><a href="https://map-imgvoid.c9users.io/account/login/">Login</a></div>
+    
+    {% endif %} 
+    
+  <div id="sidebar">
+    <h1>leaflet-sidebar</h1>
+  </div>
+    
+  </body>
+</html>
