@@ -30,6 +30,6 @@ urlpatterns = [
     url(r'^level1complete/', views.level1complete, name='level1complete'),
     url(r'^level2complete/', views.level2complete, name='level2complete'),
     url(r'^testreset/', views.testreset, name='testreset'),
-    url(r'^data.geojson$', GeoJSONLayerView.as_view(model=MushroomSpot, properties=('title', 'description', 'picture','color','num','geom')), name='data'),
+    url(r'^data.geojson$', GeoJSONLayerView.as_view(model=MushroomSpot, properties=('title', 'description', 'picture','color','num')), name='data'),
     url(r'^point.geojson$', GeoJSONLayerView.as_view(model=Point, properties=('title', 'description', 'picture_url','icon','num')), name='point')
 ] #+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
