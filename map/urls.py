@@ -20,16 +20,23 @@ from django.views.generic import TemplateView
 from djgeojson.views import GeoJSONLayerView
 
 from . import views
-from .models import MushroomSpot, Point
+from .models import FirstQuestPolygon, FirstQuestMarker, SecondQuestPolygon, SecondQuestMarker
 
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^account/', include('django.contrib.auth.urls')),
-    url(r'^$', views.home, name='home'),
-    url(r'^level1complete/', views.level1complete, name='level1complete'),
-    url(r'^level2complete/', views.level2complete, name='level2complete'),
-    url(r'^testreset/', views.testreset, name='testreset'),
-    url(r'^data.geojson$', GeoJSONLayerView.as_view(model=MushroomSpot, properties=('title', 'description', 'picture','color','num')), name='data'),
-    url(r'^point.geojson$', GeoJSONLayerView.as_view(model=Point, properties=('title', 'description', 'picture_url','icon','num')), name='point')
+#    url(r'^$', views.home, name='home'),
+    url(r'^first/', views.first, name='first'),
+    url(r'^second/', views.second, name='second'),
+    url(r'^first1/', views.first1, name='first1'),
+    url(r'^first2/', views.first2, name='first2'),
+    url(r'^second1/', views.second1, name='second1'),
+    url(r'^second2/', views.second2, name='second2'),
+    url(r'^firsttestreset/', views.firsttestreset, name='firsttestreset'),
+    url(r'^secondtestreset/', views.secondtestreset, name='secondtestreset'),
+    url(r'^1polygon.geojson$', GeoJSONLayerView.as_view(model=FirstQuestPolygon, properties=('title', 'description', 'picture','color','level')), name='1polygon'),
+    url(r'^1marker.geojson$', GeoJSONLayerView.as_view(model=FirstQuestMarker, properties=('title', 'description', 'picture_url','icon','level')), name='1marker'),
+    url(r'^2polygon.geojson$', GeoJSONLayerView.as_view(model=SecondQuestPolygon, properties=('title', 'description', 'picture','color','level')), name='2polygon'),
+    url(r'^2marker.geojson$', GeoJSONLayerView.as_view(model=SecondQuestMarker, properties=('title', 'description', 'picture_url','icon','level')), name='2marker')
 ] #+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

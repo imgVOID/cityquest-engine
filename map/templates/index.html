@@ -16,6 +16,16 @@
     </style>
     <script type="text/javascript">
     
+    
+    {%if quest == "first_quest"%}
+      var polygonurl = '{% url "1polygon" %}';
+      var markerurl = '{% url "1marker" %}';
+    {%elif quest == "second_quest"%}
+      var polygonurl = '{% url "2polygon" %}';
+      var markerurl = '{% url "2marker" %}';
+    {%endif%}    
+
+      
     var LeafIcon = L.Icon.extend({
     options: {
         shadowUrl: '',
@@ -26,9 +36,8 @@
         popupAnchor:  [0, 0]
     }
     });
-
-      var dataurl = '{% url "data" %}';
-      var pointurl = '{% url "point" %}';
+      
+      
       window.addEventListener("map:init", function (event) {
         var map = event.detail.map;
         map.addControl(new L.Control.Fullscreen());
@@ -45,7 +54,18 @@
         map.on('locationerror', onLocationError);
 
         L.easyButton('<img class="locate" src="{%static 'images/user.png'%}">', function(btn, map){
-          var content = `<button id="closeButton">close</button><br><br><h3>{{ user.get_username }}</h3><p>{{group}}</p>`;
+          var content = `
+          <button id="closeButton">close</button>
+          <br><br>
+          <h2>{{ user.get_full_name }}</h2>
+          <ul>
+          <li>Username: {{ user.username }}</li>
+          <li>Bio: {{ user.profile.bio }}</li>
+          <li>Level: {{ level }}</li>
+          <li>YOUR TOTAL PROGRESS:</li>
+          <li>First Quest level: {{ user.profile.first_quest }}</li>
+          <li>Second Quest level: {{ user.profile.second_quest }}</li>
+          </ul>`;
           sidebar.show();
           sidebar.setContent(content);
           document.getElementById("closeButton").onclick = hideSidebar;
@@ -67,14 +87,14 @@
         }
         
         // Download GeoJSON data with Ajax
-        fetch(dataurl)
+        fetch(polygonurl)
           .then(function(resp) {
             return resp.json();
           })
           .then(function(data) {
             var color = "";
             function levelFilter(feature){
-                if (feature.properties.num == {{group}}) return true
+                if (feature.properties.level == {{level}}) return true
             }
             L.geoJson(data, 
             {
@@ -101,13 +121,13 @@
               }
             }).addTo(map);
           });
-        fetch(pointurl)
+        fetch(markerurl)
           .then(function(resp) {
             return resp.json();
           })
           .then(function(data) {
             function levelFilter(feature){
-                if (feature.properties.num < {{group}}) return true
+                if (feature.properties.level < {{level}}) return true
             }
             L.geoJson(data,{filter: levelFilter,
               onEachFeature: function onEachFeature(feature, layer) {
@@ -123,28 +143,39 @@
               }
             }).addTo(map);
           });
-          function func()
-	{
-	    setTimeout( 2000); // Задержка 2 секунды, для примера.
-	}
       });
       
      
     </script>
+    
   </head>
   <body>
-    {% leaflet_map "main" %}
-    {% if user.is_authenticated %}
-    <div class="user">{{ user.get_username }} {{group}} 
-    <a href="{% url 'level1complete' %}">ToLevel2</a> 
-    <a href="{% url 'level2complete' %}">ToLevel3</a> 
-    <a href="{% url 'testreset' %}">Restart</a>
     
+    {% leaflet_map "main" %}
+    
+    {% if user.is_authenticated and test == 1 %}
+    
+    <div class="user">{{ user.get_username }} {{level}} 
+    <a href="{% url 'first1' %}">ToLevel2</a> 
+    <a href="{% url 'first2' %}">ToLevel3</a> 
+    <a href="{% url 'firsttestreset' %}">Restart</a>
     </div>
+    
+    {% elif user.is_authenticated and test == 2 %}
+    
+    <div class="user">{{ user.get_username }} {{level}} 
+    <a href="{% url 'second1' %}">ToLevel2</a> 
+    <a href="{% url 'second2' %}">ToLevel3</a> 
+    <a href="{% url 'secondtestreset' %}">Restart</a>
+    </div>
+    
     {% else %}
+    
     <div class="user"><a href="https://map-imgvoid.c9users.io/account/login/">Login</a></div>
     
     {% endif %} 
+    
+
     
   <div id="sidebar">
     <h1>leaflet-sidebar</h1>

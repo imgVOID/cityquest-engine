@@ -1,58 +1,95 @@
 from django.shortcuts import render
 from django.contrib.auth.models import Group
 from django.shortcuts import redirect
+#from .models import User
 
 #{% load geojson_tags %}
 
-def home(request):
-    username = None
-    user1 = None
-    if request.user.is_authenticated:
-        username = request.user.username
-        user1 = request.user
-    groups = []
-    for g in request.user.groups.all():
-        groups.append(g.name)
-    if len(groups) > 0:
-        groups=groups[0]
+#def home(request){
+    
+#}
+
+def first(request):
+    user = request.user
+    test = 1
+    quest = None
+    level = None
+    test = 1
+    if user.is_authenticated:
+#       !BECAUSE DJANGO GUARDIAN ANONYMOUS USER!
+        if len(user.username) > 0 \
+        and user.groups.filter(name="First Quest"):
+            quest='first_quest'
+            level = user.profile.first_quest
+        else:
+            level=1
     else:
-        groups="0"
-    return render(request, 'index.html', {'group':groups})
+        level = 1
+    return render(request, 'index.html', {'level':level, 'quest':quest, 'test':test})
 
-def level1complete(request):
-    username = None
-    if request.user.is_authenticated:
-        username = request.user
-    groupname = []
-    for g in request.user.groups.all():
-        groupname.append(g.name)
-    if groupname[0] == '0':
-        newGroup = Group.objects.get(name='1') 
-        previousGroup = Group.objects.get(name='0') 
-        username.groups.add(newGroup)
-        username.groups.remove(previousGroup)
-    return redirect('/')
+def second(request):
+    user = request.user
+    test = 2
+    quest = None
+    level = None
+    if user.is_authenticated:
+#       !BECAUSE DJANGO GUARDIAN ANONYMOUS USER!
+        if len(user.username) > 0 \
+        and user.groups.filter(name="Second Quest"):
+            level = user.profile.second_quest
+            quest = 'second_quest'
+        else:
+            level=1
+    else:
+        level = 1
+    return render(request, 'index.html', {'level':level, 'quest':quest, 'test':test})
 
-def level2complete(request):
-    username = None
-    if request.user.is_authenticated:
-        username = request.user
-    groupname = []
-    for g in request.user.groups.all():
-        groupname.append(g.name)
-    if groupname[0] == '1':
-        newGroup = Group.objects.get(name='2') 
-        previousGroup = Group.objects.get(name='1') 
-        username.groups.add(newGroup)
-        username.groups.remove(previousGroup)
-    return redirect('/')
+def first1(request):
+    user = request.user
+    if user.is_authenticated:
+        if user.groups.filter(name="First Quest") \
+        and user.profile.first_quest == 1:
+                user.profile.first_quest = 2
+                user.save()
+    return redirect('/first/')
 
-def testreset(request):
-    username = None
-    if request.user.is_authenticated:
-        username = request.user
-    for g in request.user.groups.all():
-        username.groups.remove(g.name)
-    newGroup = Group.objects.get(name='0') 
-    username.groups.add(newGroup)
-    return redirect('/')
+def first2(request):
+    user = request.user
+    if user.is_authenticated:
+        if user.groups.filter(name="First Quest") \
+        and user.profile.first_quest == 1:
+            user.profile.first_quest = 3
+            user.save()
+    return redirect('/first/')
+
+def firsttestreset(request):
+    user = request.user
+    if user.is_authenticated:
+        user.profile.first_quest = 1
+        user.save()
+    return redirect('/first/')
+    
+def second1(request):
+    user = request.user
+    if user.is_authenticated:
+        if user.groups.filter(name="Second Quest") \
+        and user.profile.second_quest == 1:
+            user.profile.second_quest = 2
+            user.save()
+    return redirect('/second/')
+
+def second2(request):
+    user = request.user
+    if user.is_authenticated:
+        if user.groups.filter(name="Second Quest") \
+        and user.profile.second_quest == 1:
+            user.profile.second_quest = 2
+            user.save()
+    return redirect('/second/')
+
+def secondtestreset(request):
+    user = request.user
+    if user.is_authenticated:
+        user.profile.second_quest = 1
+        user.save()
+    return redirect('/second/')
