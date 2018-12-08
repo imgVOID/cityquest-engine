@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+{% load leaflet_tags %}
+{% load static from staticfiles %}
+<html lang="en">
+  <head>
+    <!--[if IE 8]><script src="{% static "leaflet/eventlister.ie8.js" %}"></script><!--<![endif]-->
+    <!--[if lt IE 8]><script src="{% static "leaflet/eventlister.ie6-7.js" %}"></script><!--<![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    {% leaflet_js %}
+    {% leaflet_css %}
+    {% leaflet_js  plugins="fullscreen,buttons,sidebar,routing" %}
+    {% leaflet_css plugins="fullscreen,buttons,sidebar,routing" %}
+    <link rel="stylesheet" href="{% static "css/style.css" %}" />
+    
+    <script type="text/javascript">
+        {% block geodata %}
+        {% endblock %}
+      
+        var LeafIcon = L.Icon.extend({
+            options: {
+            shadowUrl: '',
+            iconSize:     [40, 40],
+            shadowSize:   [50, 64],
+            iconAnchor:   [10, 10],
+            shadowAnchor: [4, 62],
+            popupAnchor:  [0, 0]
+        }
+        });
+      
+      
+      window.addEventListener("map:init", function (event) {
+        var map = event.detail.map;
+        map.addControl(new L.Control.Fullscreen({ position: 'bottomleft' }));
+        
+        var userlatlng = 0;
+        
+        function onLocationFound(e) {
+          
+            var radius = e.accuracy/2;
+            userlatlng = e.latlng;
+            current_accuracy = L.circle(e.latlng, radius);
+            current_position = L.marker(e.latlng);
+            current_position.addTo(map).bindPopup("You are here");
+            current_accuracy.addTo(map);
+        }
+
+        function onLocationError(e) {
+            alert(e.message);
+        }
+
+        map.on('locationfound', onLocationFound);
+        map.on('locationerror', onLocationError);
+        
+        function locateUser(){
+          map.removeLayer(current_position);
+          map.removeLayer(current_accuracy);
+          map.locate({setView: true, maxZoom: 15});
+        }
+        
+        map.locate({setView: false});
+        
+        window.userPlace = userlatlng.toString().slice(7,-1).split(', ');
+        
+        var toLocate = L.easyButton('<img class="locate" src="{%static 'map/images/locate.png'%}">', function(btn, map){
+          locateUser();
+          
+          route.getPlan().setWaypoints([userlatlng,L.latLng(center[0],center[1])]);
+          route.route();
+        });
+
+        var profileButton = L.easyButton('<img class="profileButtonImage" src="{%static 'map/images/user.png'%}">', function(btn, map){
+          
+          var content = `
+          <br>
+          <button id="closeButton">close</button>
+          <br>
+          <h2>Quest: {%block quest%}{%endblock%}</h2>
+          <h3>LEVEL: {{ level }} 
+          ({% block progress %}{% endblock %}) </h3>
+          {% if level == 1%}
+          <h3>Hello! You need to buy this quest ;)
+          You can do this by click on your first search area and follow instructions.
+          Good luck!</h3>
+          <p>Tip: to FULLSCREEN the map click on left bottom button after you close this window.</p>
+          {% endif %}
+          <h3>{{ user.username }} ({{ user.get_full_name }})</h3>
+          <h4>YOUR TOTAL PROGRESS:</h4>
+          <ul>
+          <li><a href="{% url 'first'%}">First Quest level</a>: {{ user.profile.first_quest }} ({{ progress1 }}%)</li>
+          <li><a href="{% url 'second'%}">Second Quest level</a>: {{ user.profile.second_quest }} ({{ progress2 }}%)</li>
+          </ul>`;
+          
+          
+          sidebar.show();
+          sidebar.setContent(content);
+          document.getElementById("closeButton").onclick = hideSidebarFly;
+          
+        },{ id: 'profileButton', position: 'bottomright' });
+        
+        map.addControl(profileButton);
+        
+        var buttons = [];
+        buttons.push(toLocate);
+        
+        var sidebar = L.control.sidebar('sidebar', {
+          closebutton: true,
+          position: 'right'
+        });
+        
+        map.addControl(sidebar);
+        
+        function hideSidebar(){
+          sidebar.hide();
+        }
+        {% if level == 1 %}
+        count = 1;
+        {% else %}
+        count = 0;
+        {% endif %}
+        
+        function hideSidebarFly(){
+          
+          sidebar.hide();
+          if (count){
+            count = 0;
+            document.getElementById('toPolygonButton').click();
+          }
+        }
+        
+        // Download GeoJSON data with Ajax
+        fetch(polygonurl)
+          .then(function(resp) {
+            return resp.json();
+          })
+          .then(function(data) {
+            var color = "";
+            function levelFilter(feature){
+                if (feature.properties.level == {{level}}) return true
+            }
+            L.geoJson(data, 
+            {
+              filter: levelFilter,
+              onEachFeature: function onEachFeature(feature, layer) {
+                center = layer.getBounds().getCenter().toString().slice(7,-1).split(', ');
+                var content = `
+                <button id="closeButton">close</button>
+                <br><br><img width="100" height="50" src="${feature.properties.picture}"/>
+                <h3 id="title">${feature.properties.title}</h3>
+                <p>${feature.properties.description}</p>
+                <br>
+                <button id="walkingButton">Walking directions</button>
+                <button id="drivingButton">Driving directions</button>
+                <button id="cyclingButton">Cycling directions</button>
+                <button id="directionsButton">Google Maps directions</button>
+                <br>
+                <ul id = "directionsList">`;
+                
+                map.setView(center);
+                
+                {% if level == 1 %}
+                    document.getElementById('profileButton').click();
+                {% endif %}
+                
+                window.toPolygon = L.easyButton('<img class="locate" src="{% static 'map/images/toquest.png' %}">', function(btn, map){
+                  map.flyTo(center);
+                },{ id: 'toPolygonButton' });
+                
+                buttons.push(toPolygon);
+                L.easyBar(buttons).addTo(map);
+                
+                function sidebarButtons(){
+                  document.getElementById('closeButton').onclick = hideSidebar;
+                  document.getElementById('directionsButton').onclick = directionsButton;
+                  {% for type in routeTypes %}
+                  document.getElementById('{{ type }}Button').onclick = function(){
+                    sidebar.hide();
+                    route.getRouter().options.profile = 'mapbox/{{ type }}';
+                    route.route();
+                  }
+                  {% endfor %}
+                }
+                
+                window.route = L.Routing.control({
+                    waypoints: [
+                    userlatlng,
+                    L.latLng(center[0],center[1])
+                    ],
+                    fitSelectedRoutes: false,
+                    createMarker: function() { return null; },
+                    router: L.Routing.mapbox('pk.eyJ1IjoiaW1ndm9pZCIsImEiOiJjam9rb2pjdTUwYzNoM3Zub3RqajNjd21qIn0.p3FJ-deF-vck6YdoScgFIA',{ profile: false }),
+                    routeLine: function(route) {
+                      var line = L.Routing.line(route, {
+                        addWaypoints: false,
+                        extendToWaypoints: false,
+                        routeWhileDragging: false,
+                        autoRoute: true,
+                        useZoomParameter: false,
+                        draggableWaypoints: false,
+                        fitSelectedRoutes: false
+                      });
+                      line.eachLayer(function(l) {
+                        l.on('click', function(e) {
+                          sidebar.show();
+                          sidebar.setContent(content);
+                          sidebarButtons();
+                        });
+                      });
+                      return line;
+                      
+                    }
+                  });
+                  window.route.addTo(map);
+                  
+                var directionsButton = function(){
+                  userPlace = userlatlng.toString().slice(7,-1).split(', ');
+                  directions = `https://www.google.com/maps/dir/?api=1&origin=${center[0]},${center[1]}&destination=${userPlace[0]},${userPlace[1]}&travelmode=`
+                  contentDirections = `
+                  <li><a class = "directionsLink" href="${directions}walking" target="_blank">Walking</a></li>
+                  <li><a class = "directionsLink" href="${directions}driving" target="_blank">Driving</a></li>
+                  <li><a class = "directionsLink" href="${directions}transit" target="_blank">City Transport</a></li>`
+                  document.getElementById("directionsList").innerHTML=contentDirections;
+                  //map.removeControl(routes);
+                }
+                
+                
+                layer.on('click', function(){
+                  sidebar.show();
+                  sidebar.setContent(content);
+                  sidebarButtons();
+                });
+                
+                
+                color = feature.properties.color;
+              },
+              style: function(feature) {
+              return {"color":feature.properties.color}
+              }
+            }).addTo(map);
+          });
+          
+        fetch(markerurl)
+          .then(function(resp) {
+            return resp.json();
+          })
+          .then(function(data) {
+            function levelFilter(feature){
+                if (feature.properties.level < {{level}}) return true
+            }
+            L.geoJson(data,{filter: levelFilter,
+              onEachFeature: function onEachFeature(feature, layer) {
+                var content = `<button id="closeButton">close</button><br><br><img width="100" height="50" src="/map/static/map/images/blogger.png"/><h3>${feature.properties.title}</h3><p>${feature.properties.description}</p>`;
+                layer.on('click', function(){
+                  sidebar.show();
+                  sidebar.setContent(content);
+                  document.getElementById("closeButton").onclick = hideSidebar;
+                });
+              },
+              pointToLayer: function (feature, latlng) {
+                return L.marker(latlng, { icon: new LeafIcon({iconUrl: feature.properties.icon})});
+              }
+            }).addTo(map);
+          });
+          
+          
+      });
+      
+     
+    </script>
+    
+  </head>
+  <body>
+    
+    {% leaflet_map "main" %}
+    
+    {% if user.is_authenticated and test == 1 %}
+    
+    <div class="user">{{ user.get_username }} {{level}} 
+    <a href="{% url 'first1' %}">ToLevel2</a> 
+    <a href="{% url 'first2' %}">ToLevel3</a> 
+    <a href="{% url 'firsttestreset' %}">Restart</a>
+    </div>
+    
+    {% elif user.is_authenticated and test == 2 %}
+    
+    <div class="user">{{ user.get_username }} {{level}} 
+    <a href="{% url 'second1' %}">ToLevel2</a> 
+    <a href="{% url 'second2' %}">ToLevel3</a> 
+    <a href="{% url 'secondtestreset' %}">Restart</a>
+    </div>
+    
+    {% else %}
+    
+    <div class="user"><a href="https://map-imgvoid.c9users.io/account/login/">Login</a></div>
+    
+    {% endif %} 
+    
+
+    
+  <div id="sidebar">
+    <h1></h1>
+  </div>
+    
+  </body>
+</html>

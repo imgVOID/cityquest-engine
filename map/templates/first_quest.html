@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block geodata %}
+    var polygonurl = '{% url "1polygon" %}';
+    var markerurl = '{% url "1marker" %}';
+{% endblock %}
+
+{% block quest %}
+First Quest
+{% endblock %}
+
+{% block progress %}
+{{ progress1 }}%
+{% endblock %}

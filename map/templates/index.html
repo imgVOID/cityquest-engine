@@ -23,6 +23,9 @@
     {%elif quest == "second_quest"%}
       var polygonurl = '{% url "2polygon" %}';
       var markerurl = '{% url "2marker" %}';
+    {% else %}
+      var polygonurl = '';
+      var markerurl = '';
     {%endif%}    
 
       
@@ -54,6 +57,7 @@
         map.on('locationerror', onLocationError);
 
         L.easyButton('<img class="locate" src="{%static 'images/user.png'%}">', function(btn, map){
+          {% if quest != None %}
           var content = `
           <button id="closeButton">close</button>
           <br><br>
@@ -66,6 +70,16 @@
           <li>First Quest level: {{ user.profile.first_quest }}</li>
           <li>Second Quest level: {{ user.profile.second_quest }}</li>
           </ul>`;
+          {% else %}
+          var content = `
+          <br><br>
+          <h2>{{ user.get_full_name }}</h2>
+          <h3>You need to buy this quest ;)</h3>
+          <ul>
+          <li>Username: {{ user.username }}</li>
+          <li>Bio: {{ user.profile.bio }}</li>
+          </ul>`
+          {% endif %}
           sidebar.show();
           sidebar.setContent(content);
           document.getElementById("closeButton").onclick = hideSidebar;
@@ -80,7 +94,21 @@
           position: 'right'
         });
 
+        
         map.addControl(sidebar);
+        
+        {% if quest == None %}
+          var content = `
+          <br><br>
+          <h2>{{ user.get_full_name }}</h2>
+          <h3>You need to buy this quest ;)</h3>
+          <ul>
+          <li>Username: {{ user.username }}</li>
+          <li>Bio: {{ user.profile.bio }}</li>
+          </ul>`
+          sidebar.setContent(content);
+          sidebar.show();
+        {% endif %}
         
         function hideSidebar(){
           sidebar.hide();

@@ -61,6 +61,11 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.cache.UpdateCacheMiddleware',
+    # ... another middlewares
+    'django.middleware.common.CommonMiddleware',
+    # ... rest of middlewares
+    'django.middleware.cache.FetchFromCacheMiddleware',
 ]
 
 ROOT_URLCONF = 'map.urls'
@@ -131,7 +136,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
-STATIC_URL = '/map/static/'
+STATIC_URL = '/static/'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'redis_cache.RedisCache',
+        'LOCATION': '127.0.0.1:6379',
+    },
+}
+
+
 
 LEAFLET_CONFIG = {
     #'TILES':'https://2.base.maps.api.here.com/maptile/2.1/mapnopttile/newest/normal.day/{z}/{x}/{y}/256/png8?app_id=xFlVyCWdTcCybguLGWAb&app_code=HEoHoQb3yk39kcOKN2RH_w',
@@ -140,7 +154,7 @@ LEAFLET_CONFIG = {
             ('Satellite & Transport', 'https://2.aerial.maps.api.here.com/maptile/2.1/maptile/newest/hybrid.day/{z}/{x}/{y}/256/png8?app_id=xFlVyCWdTcCybguLGWAb&app_code=HEoHoQb3yk39kcOKN2RH_w', {'attribution': ''})],
     'ATTRIBUTION_PREFIX': 'by imgVOID',
     'DEFAULT_CENTER': (50.4501, 30.5234),
-    'DEFAULT_ZOOM': 13,
+    'DEFAULT_ZOOM': 15,
     'MIN_ZOOM': 12,
     'MAX_ZOOM': 18,
     'RESET_VIEW' : False,
@@ -158,6 +172,11 @@ LEAFLET_CONFIG = {
         'sidebar': {
             'css': '/map/static/css/L.Control.Sidebar.css',
             'js': '/map/static/js/L.Control.Sidebar.js',
+            'auto-include': True,
+        },
+        'routing': {
+            'css': 'https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css',
+            'js': 'https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js',
             'auto-include': True,
         },
     }

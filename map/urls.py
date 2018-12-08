@@ -19,13 +19,14 @@ from django.contrib import admin
 from django.views.generic import TemplateView
 from djgeojson.views import GeoJSONLayerView
 
+
 from . import views
 from .models import FirstQuestPolygon, FirstQuestMarker, SecondQuestPolygon, SecondQuestMarker
 
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^account/', include('django.contrib.auth.urls')),
+    url(r'^accounts/', include('django.contrib.auth.urls')),
 #    url(r'^$', views.home, name='home'),
     url(r'^first/', views.first, name='first'),
     url(r'^second/', views.second, name='second'),
@@ -35,8 +36,9 @@ urlpatterns = [
     url(r'^second2/', views.second2, name='second2'),
     url(r'^firsttestreset/', views.firsttestreset, name='firsttestreset'),
     url(r'^secondtestreset/', views.secondtestreset, name='secondtestreset'),
-    url(r'^1polygon.geojson$', GeoJSONLayerView.as_view(model=FirstQuestPolygon, properties=('title', 'description', 'picture','color','level')), name='1polygon'),
-    url(r'^1marker.geojson$', GeoJSONLayerView.as_view(model=FirstQuestMarker, properties=('title', 'description', 'picture_url','icon','level')), name='1marker'),
-    url(r'^2polygon.geojson$', GeoJSONLayerView.as_view(model=SecondQuestPolygon, properties=('title', 'description', 'picture','color','level')), name='2polygon'),
+    url(r'^$', views.quest_list, name='quest_list'),
+    url(r'^1marker.geojson$', views.marker1, name='1marker'),
+    url(r'^1polygon.geojson$', views.polygon1, name='1polygon'),
+    url(r'^2polygon.geojson$', views.polygon2, name='2polygon'),
     url(r'^2marker.geojson$', GeoJSONLayerView.as_view(model=SecondQuestMarker, properties=('title', 'description', 'picture_url','icon','level')), name='2marker')
 ] #+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

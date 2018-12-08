@@ -1,0 +1,62 @@
+html, body, .leaflet-container {
+    height: 100%; 
+    width: 100vw; 
+}
+body {
+    padding: 0; 
+    margin: 0;
+}
+.user {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 999999999;
+    background-color: white;
+}
+.locate {
+    margin-left:-0.04em !important; 
+    margin-top:0.43em !important; 
+    width: 1.25em;
+    height:1.25em; 
+    text-align: center;
+}
+
+.close {
+    z-index: 999999;
+}
+
+#profileButton {
+    width:2.5em;
+    height:2.5em;
+}
+
+.profileButtonImage {
+    margin-left: 0.075em !important; 
+    margin-top:0.45em !important; 
+    width: 1.55em;
+    height:1.55em; 
+    text-align: center;
+}
+
+.leaflet-control-layers-expanded {
+    color: black;
+	background-color: white;
+}
+
+.leaflet-touch .leaflet-control-layers-toggle {
+    width: 2.75em !important;
+    height: 2.75em !important;
+    background-size: 20px 20px;
+}
+
+.leaflet-routing-alternatives-container {
+    background-color: red !important;
+}
+
+.leaflet-control-container .leaflet-routing-container {
+    display: none!important;
+}
+
+.red {
+    background-color: rgba(225,225,225,0.3) !important;
+}

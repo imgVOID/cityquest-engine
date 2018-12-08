@@ -29,36 +29,28 @@ class Quest(models.Model):
 
 class FirstQuestPolygon(models.Model):
 
-    quest = models.ForeignKey(Quest, on_delete=models.CASCADE, default="1")
     title = models.CharField(max_length=256)
+    quest = models.ForeignKey(Quest, on_delete=models.CASCADE, default="1")
     level = models.IntegerField(default="1")
     description = models.TextField()
     picture = models.CharField(max_length=100, default="")
     color = models.CharField(max_length=20, default="#ff7800")
     geom = PolygonField()
     def __str__(self):
-        return self.title + " | " + self.quest.title
-
-    @property
-    def picture_url(self):
-        return self.picture.url
+        return self.title
 
 class FirstQuestMarker(models.Model):
     
-    #quest = models.ForeignKey(Quest, on_delete=models.CASCADE, default="")
+#    quest = models.ForeignKey(Quest, on_delete=models.CASCADE, default="1")
     title = models.CharField(max_length=256)
     level = models.IntegerField(default="1")
     description = models.TextField()
-    picture = models.ImageField()
+    picture = models.CharField(max_length=100, default="")
     icon = models.TextField(default="")
     geom = PointField()
 
     def __str__(self):
         return self.title
-
-    @property
-    def picture_url(self):
-        return self.picture.url
 
 class SecondQuestPolygon(models.Model):
 
@@ -71,22 +63,14 @@ class SecondQuestPolygon(models.Model):
     def __str__(self):
         return self.title
 
-    @property
-    def picture_url(self):
-        return self.picture.url
-
 class SecondQuestMarker(models.Model):
 
     title = models.CharField(max_length=256)
     level = models.IntegerField(default="1")
     description = models.TextField()
-    picture = models.ImageField()
+    picture = models.CharField(max_length=100, default="")
     icon = models.TextField(default="")
     geom = PointField()
 
     def __str__(self):
         return self.title
-
-    @property
-    def picture_url(self):
-        return self.picture.url

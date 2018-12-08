@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+{% load leaflet_tags %}
+{% load static from staticfiles %}
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    {% leaflet_js %}
+    {% leaflet_css %}
+    {% leaflet_js  plugins="fullscreen,buttons,sidebar" %}
+    {% leaflet_css plugins="fullscreen,buttons,sidebar" %}
+    <link rel="stylesheet" href="{% static "css/style.css" %}" />
+    
+    <script type="text/javascript">
+      
+      window.addEventListener("map:init", function mapmake(event) {
+        var map = event.detail.map;
+        map.addControl(new L.Control.Fullscreen({ position: 'bottomleft' }));
+        
+        var profileButton = L.easyButton('<img class="profileButtonImage" src="{%static 'images/user.png'%}">', function(btn, map){
+          
+          var content = `
+          <br>
+          <button id="closeButton">close</button>
+          <br>
+          <h3>{{ user.username }} ({{ user.get_full_name }})</h3>
+          <h4>YOUR TOTAL PROGRESS:</h4>
+          <ul>
+          <li><a href="{% url 'first'%}">First Quest level</a>: {{ user.profile.first_quest }} ({{ progress1 }}%)</li>
+          <li><a href="{% url 'second'%}">Second Quest level</a>: {{ user.profile.second_quest }} ({{ progress2 }}%)</li>
+          </ul>`;
+          
+          
+          sidebar.show();
+          sidebar.setContent(content);
+          document.getElementById("closeButton").onclick = hideSidebar;
+          
+        },{ id: 'profileButton', position: 'bottomright' });
+        
+        map.addControl(profileButton);
+        
+        var sidebar = L.control.sidebar('sidebar', {
+          closebutton: true,
+          position: 'right'
+        });
+        
+        map.addControl(sidebar);
+        
+        function hideSidebar(){
+          sidebar.hide();
+        }
+        
+        function getPoints(data){
+            var features = data.features;
+            window.linePoints = [];
+            window.levels = 0;
+            for (i = 0; i < features.length; i += 1) {
+                linePoints.push(features[i].geometry.coordinates);
+                levels += 1;
+            }
+        }
+        
+        // Download GeoJSON data with Ajax
+        fetch('1marker.geojson')
+          .then(function(resp) {
+            return resp.json();
+          })
+          .then(function(data) {
+              
+            getPoints(data);
+            
+            L.geoJSON({"type": "LineString","coordinates": linePoints}, 
+                {style: {"color": "red", "weight": 15, "opacity": 0.65}, 
+                onEachFeature: function onEachFeature(feature, layer) {
+                    var content = `<button id="closeButton">close</button><br><br><h1>FIRST QUEST</h1><h4>LEVELS: ${levels}</h4><p>First quest description</p><h3>YOUR PROGRESS: {{ progress1 }}%</h3><a href="{% url 'first' %}"><button>Go to First Quest</button></a>`;
+                    layer.on('click', function(){
+                        sidebar.show();
+                        sidebar.setContent(content);
+                        document.getElementById("closeButton").onclick = hideSidebar;
+                    });
+                }
+            }).addTo(map);
+            
+          });
+          
+          
+        fetch('2marker.geojson')
+          .then(function(resp) {
+            return resp.json();
+          })
+          .then(function(data) {
+            
+            getPoints(data);
+
+            L.geoJSON({"type": "LineString","coordinates": linePoints}, 
+                {style: {"color": "blue", "weight": 15, "opacity": 0.65}, 
+                onEachFeature: function onEachFeature(feature, layer) {
+                    var content = `<button id="closeButton">close</button><br><br><h1>SECOND QUEST</h1><h4>LEVELS: ${levels}</h4><p>Second quest description</p><h3>YOUR PROGRESS: {{ progress2 }}%</h3><a href="{% url 'second' %}"><button>Go to Second Quest</button></a>`;
+                    layer.on('click', function(){
+                        sidebar.show();
+                        sidebar.setContent(content);
+                        document.getElementById("closeButton").onclick = hideSidebar;
+                    });
+                }
+            }).addTo(map);
+            
+          });
+          
+      });
+      
+     
+    </script>
+    
+  </head>
+  <body>
+    
+    {% leaflet_map "main" settings_overrides=override %}
+    
+  <div id="sidebar">
+    <h1></h1>
+  </div>
+    
+  </body>
+</html>
