@@ -7,7 +7,6 @@ from . import models as models
 
 
 admin.site.register(models.Profile, admin.ModelAdmin)
-admin.site.register(models.Quest, admin.ModelAdmin)
 admin.site.register(models.FirstQuestPolygon, admin.ModelAdmin)
 admin.site.register(models.FirstQuestMarker, admin.ModelAdmin)
 admin.site.register(models.SecondQuestPolygon, admin.ModelAdmin)

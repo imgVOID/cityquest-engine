@@ -126,7 +126,8 @@
             document.getElementById('toPolygonButton').click();
           }
         }
-        
+        {% load cache %}
+        {% cache 500 mapdata request.user.username %}
         // Download GeoJSON data with Ajax
         fetch(polygonurl)
           .then(function(resp) {
@@ -151,6 +152,7 @@
                 <button id="walkingButton">Walking directions</button>
                 <button id="drivingButton">Driving directions</button>
                 <button id="cyclingButton">Cycling directions</button>
+                <button id="hideButton">Hide directions</button>
                 <button id="directionsButton">Google Maps directions</button>
                 <br>
                 <ul id = "directionsList">`;
@@ -171,6 +173,11 @@
                 function sidebarButtons(){
                   document.getElementById('closeButton').onclick = hideSidebar;
                   document.getElementById('directionsButton').onclick = directionsButton;
+                  document.getElementById('hideButton').onclick = function(){
+                    sidebar.hide();
+                    route.getRouter().options.profile = 'mapbox/';
+                    route.route();
+                  };
                   {% for type in routeTypes %}
                   document.getElementById('{{ type }}Button').onclick = function(){
                     sidebar.hide();
@@ -248,7 +255,7 @@
             }
             L.geoJson(data,{filter: levelFilter,
               onEachFeature: function onEachFeature(feature, layer) {
-                var content = `<button id="closeButton">close</button><br><br><img width="100" height="50" src="/map/static/map/images/blogger.png"/><h3>${feature.properties.title}</h3><p>${feature.properties.description}</p>`;
+                var content = `<button id="closeButton">close</button><br><br><img width="100" height="50" src="${feature.properties.picture_url}"/><h3>${feature.properties.title}</h3><p>${feature.properties.description}</p>`;
                 layer.on('click', function(){
                   sidebar.show();
                   sidebar.setContent(content);
@@ -260,7 +267,7 @@
               }
             }).addTo(map);
           });
-          
+          {% endcache %}
           
       });
       

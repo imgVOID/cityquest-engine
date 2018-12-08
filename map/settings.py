@@ -65,7 +65,6 @@ MIDDLEWARE_CLASSES = [
     # ... another middlewares
     'django.middleware.common.CommonMiddleware',
     # ... rest of middlewares
-    'django.middleware.cache.FetchFromCacheMiddleware',
 ]
 
 ROOT_URLCONF = 'map.urls'

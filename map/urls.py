@@ -19,6 +19,8 @@ from django.contrib import admin
 from django.views.generic import TemplateView
 from djgeojson.views import GeoJSONLayerView
 
+from django.views.decorators.cache import cache_page
+
 
 from . import views
 from .models import FirstQuestPolygon, FirstQuestMarker, SecondQuestPolygon, SecondQuestMarker
@@ -36,7 +38,7 @@ urlpatterns = [
     url(r'^second2/', views.second2, name='second2'),
     url(r'^firsttestreset/', views.firsttestreset, name='firsttestreset'),
     url(r'^secondtestreset/', views.secondtestreset, name='secondtestreset'),
-    url(r'^$', views.quest_list, name='quest_list'),
+    url(r'^$', cache_page(600)(views.quest_list), name='quest_list'),
     url(r'^1marker.geojson$', views.marker1, name='1marker'),
     url(r'^1polygon.geojson$', views.polygon1, name='1polygon'),
     url(r'^2polygon.geojson$', views.polygon2, name='2polygon'),

@@ -21,16 +21,9 @@ def create_user_profile(sender, instance, created, **kwargs):
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
-class Quest(models.Model):
-    title = models.CharField(max_length=256)
-    description = models.TextField()
-    def __str__(self):
-        return self.title
-
 class FirstQuestPolygon(models.Model):
 
     title = models.CharField(max_length=256)
-    quest = models.ForeignKey(Quest, on_delete=models.CASCADE, default="1")
     level = models.IntegerField(default="1")
     description = models.TextField()
     picture = models.CharField(max_length=100, default="")
@@ -38,10 +31,11 @@ class FirstQuestPolygon(models.Model):
     geom = PolygonField()
     def __str__(self):
         return self.title
+    @property
+    def picture_url(self):
+        return self.picture
 
 class FirstQuestMarker(models.Model):
-    
-#    quest = models.ForeignKey(Quest, on_delete=models.CASCADE, default="1")
     title = models.CharField(max_length=256)
     level = models.IntegerField(default="1")
     description = models.TextField()
@@ -51,6 +45,9 @@ class FirstQuestMarker(models.Model):
 
     def __str__(self):
         return self.title
+    @property
+    def picture_url(self):
+        return self.picture
 
 class SecondQuestPolygon(models.Model):
 
@@ -62,6 +59,9 @@ class SecondQuestPolygon(models.Model):
     geom = PolygonField()
     def __str__(self):
         return self.title
+    @property
+    def picture_url(self):
+        return self.picture
 
 class SecondQuestMarker(models.Model):
 
@@ -74,3 +74,6 @@ class SecondQuestMarker(models.Model):
 
     def __str__(self):
         return self.title
+    @property
+    def picture_url(self):
+        return self.picture

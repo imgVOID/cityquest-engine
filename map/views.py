@@ -12,6 +12,9 @@ from django.core.serializers import serialize
 from djgeojson.serializers import Serializer as GeoJSONSerializer
 
 from django.core.cache import cache
+from django.views.decorators.cache import cache_page
+from django.core.cache.utils import make_template_fragment_key
+
 
 @login_required(login_url='/accounts/login/')
 def first(request):
@@ -24,6 +27,7 @@ def first(request):
             level = user.profile.first_quest
     else:
         level = 1
+    cache.set('first_level',level)
     first_quest_progress = int(float(user.profile.first_quest)/float(FirstQuestPolygon.objects.all().count())*100.0)
     second_quest_progress = int(float(user.profile.second_quest)/float(SecondQuestPolygon.objects.all().count())*100.0)
     route_type = ['walking','cycling','driving']
@@ -33,13 +37,15 @@ def first(request):
 def second(request):
     user = request.user
     test = 2
-    quest = None
     level = None
-    if user.is_authenticated and user.groups.filter(name="Second Quest"):
+    quest = None
+    if not level:
+        if user.is_authenticated and user.groups.filter(name="Second Quest"):
             level = user.profile.second_quest
             quest = 'second_quest'
-    else:
-        level = 1
+        else:
+            level = 1
+    
     first_quest_progress = int(float(user.profile.first_quest)/float(FirstQuestPolygon.objects.all().count())*100.0)
     second_quest_progress = int(float(user.profile.second_quest)/float(SecondQuestPolygon.objects.all().count())*100.0)
     route_type = ['walking','cycling','driving']
@@ -50,8 +56,10 @@ def first1(request):
     if user.is_authenticated:
         if user.groups.filter(name="First Quest") \
         and user.profile.first_quest == 1:
-                user.profile.first_quest = 2
-                user.save()
+            user.profile.first_quest = 2
+            user.save()
+            key = make_template_fragment_key('mapdata',[request.user.username])
+            cache.delete(key)
     return redirect('/first/')
 
 def first2(request):
@@ -61,6 +69,8 @@ def first2(request):
         and user.profile.first_quest == 1:
             user.profile.first_quest = 3
             user.save()
+            key = make_template_fragment_key('mapdata',[request.user.username])
+            cache.delete(key)
     return redirect('/first/')
 
 def firsttestreset(request):
@@ -68,6 +78,8 @@ def firsttestreset(request):
     if user.is_authenticated:
         user.profile.first_quest = 1
         user.save()
+        key = make_template_fragment_key('mapdata',[request.user.username])
+        cache.delete(key)
     return redirect('/first/')
     
 def second1(request):
@@ -77,6 +89,8 @@ def second1(request):
         and user.profile.second_quest == 1:
             user.profile.second_quest = 2
             user.save()
+            key = make_template_fragment_key('mapdata',[request.user.username])
+            cache.delete(key)
     return redirect('/second/')
 
 def second2(request):
@@ -86,6 +100,8 @@ def second2(request):
         and user.profile.second_quest == 2:
             user.profile.second_quest = 3
             user.save()
+            key = make_template_fragment_key('mapdata',[request.user.username])
+            cache.delete(key)
     return redirect('/second/')
 
 def secondtestreset(request):
@@ -93,6 +109,8 @@ def secondtestreset(request):
     if user.is_authenticated:
         user.profile.second_quest = 1
         user.save()
+        key = make_template_fragment_key('mapdata',[request.user.username])
+        cache.delete(key)
     return redirect('/second/')
 
 @login_required(login_url='/accounts/login/')
