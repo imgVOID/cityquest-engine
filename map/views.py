@@ -58,7 +58,7 @@ def first1(request):
         and user.profile.first_quest == 1:
             user.profile.first_quest = 2
             user.save()
-            key = make_template_fragment_key('mapdata',[request.user.username])
+            key = make_template_fragment_key('mapdata_first',[request.user.username])
             cache.delete(key)
     return redirect('/first/')
 
@@ -69,7 +69,7 @@ def first2(request):
         and user.profile.first_quest == 1:
             user.profile.first_quest = 3
             user.save()
-            key = make_template_fragment_key('mapdata',[request.user.username])
+            key = make_template_fragment_key('mapdata_first',[request.user.username])
             cache.delete(key)
     return redirect('/first/')
 
@@ -78,7 +78,7 @@ def firsttestreset(request):
     if user.is_authenticated:
         user.profile.first_quest = 1
         user.save()
-        key = make_template_fragment_key('mapdata',[request.user.username])
+        key = make_template_fragment_key('mapdata_first',[request.user.username])
         cache.delete(key)
     return redirect('/first/')
     
@@ -89,7 +89,7 @@ def second1(request):
         and user.profile.second_quest == 1:
             user.profile.second_quest = 2
             user.save()
-            key = make_template_fragment_key('mapdata',[request.user.username])
+            key = make_template_fragment_key('mapdata_second',[request.user.username])
             cache.delete(key)
     return redirect('/second/')
 
@@ -100,7 +100,7 @@ def second2(request):
         and user.profile.second_quest == 2:
             user.profile.second_quest = 3
             user.save()
-            key = make_template_fragment_key('mapdata',[request.user.username])
+            key = make_template_fragment_key('mapdata_second',[request.user.username])
             cache.delete(key)
     return redirect('/second/')
 
@@ -109,7 +109,7 @@ def secondtestreset(request):
     if user.is_authenticated:
         user.profile.second_quest = 1
         user.save()
-        key = make_template_fragment_key('mapdata',[request.user.username])
+        key = make_template_fragment_key('mapdata_second',[request.user.username])
         cache.delete(key)
     return redirect('/second/')
 
