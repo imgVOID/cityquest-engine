@@ -1,8 +1,15 @@
 {% extends "base.html" %}
 
+{% block quest %}
+Second Quest
+{% endblock %}
+
+{% block progress %}
+({{ progress2 }}%)
+{% endblock %}
+
 {% block content %}
 {% load cache %}
-{% load static from staticfiles %}
 {% cache 500 mapdata_second request.user.username %}
 fetch('{% url "2polygon" %}')
     .then(function(resp) {
@@ -17,7 +24,6 @@ fetch('{% url "2polygon" %}')
     {
         filter: levelFilter,
         onEachFeature: function onEachFeature(feature, layer) {
-        center = layer.getBounds().getCenter().toString().slice(7,-1).split(', ');
         var content = `
             <button id="closeButton">close</button>
             <br><br><img width="100" height="50" src="${feature.properties.picture}"/>
@@ -27,28 +33,15 @@ fetch('{% url "2polygon" %}')
             <button id="walkingButton">Walking directions</button>
             <button id="drivingButton">Driving directions</button>
             <button id="cyclingButton">Cycling directions</button>
-            <button id="hideButton">Hide directions</button>
+            <button id="hideRouterButton">Hide directions</button>
             <button id="directionsButton">Google Maps directions</button>
             <br>
             <ul id = "directionsList">`;
-                
-            map.setView(center);
-            
-            {% if level == 1 %}
-                document.getElementById('profileButton').click();
-            {% endif %}
-            
-            window.toPolygon = L.easyButton('<img class="locate" src="{% static 'map/images/toquest.png' %}">', function(btn, map){
-              map.flyTo(center);
-            },{ id: 'toPolygonButton' });
-                
-            buttons.push(toPolygon);
-            L.easyBar(buttons).addTo(map);
             
             function sidebarButtons(){
               document.getElementById('closeButton').onclick = hideSidebar;
               document.getElementById('directionsButton').onclick = directionsButton;
-              document.getElementById('hideButton').onclick = function(){
+              document.getElementById('hideRouterButton').onclick = function(){
                 sidebar.hide();
                 route.getRouter().options.profile = 'mapbox/';
                 route.route();
@@ -63,10 +56,7 @@ fetch('{% url "2polygon" %}')
             }
             
             window.route = L.Routing.control({
-                waypoints: [
-                userlatlng,
-                L.latLng(center[0],center[1])
-                ],
+                waypoints: [userlatlng,{{center}}],
                 fitSelectedRoutes: false,
                 createMarker: function() { return null; },
                 router: L.Routing.mapbox('pk.eyJ1IjoiaW1ndm9pZCIsImEiOiJjam9rb2pjdTUwYzNoM3Zub3RqajNjd21qIn0.p3FJ-deF-vck6YdoScgFIA',{ profile: false }),
@@ -95,6 +85,7 @@ fetch('{% url "2polygon" %}')
               
             var directionsButton = function(){
               userPlace = userlatlng.toString().slice(7,-1).split(', ');
+              var center = {{center}};
               directions = `https://www.google.com/maps/dir/?api=1&origin=${center[0]},${center[1]}&destination=${userPlace[0]},${userPlace[1]}&travelmode=`
               contentDirections = `
               <li><a class = "directionsLink" href="${directions}walking" target="_blank">Walking</a></li>

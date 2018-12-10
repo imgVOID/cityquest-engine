@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+{% load cache %}
+{% cache 5000 statics %}
 {% load leaflet_tags %}
 {% load static from staticfiles %}
 <html lang="en">
@@ -9,7 +11,7 @@
     {% leaflet_js  plugins="fullscreen,buttons,sidebar" %}
     {% leaflet_css plugins="fullscreen,buttons,sidebar" %}
     <link rel="stylesheet" href="{% static "css/style.css" %}" />
-    
+{% endcache %}
     <script type="text/javascript">
       
       window.addEventListener("map:init", function mapmake(event) {
@@ -65,13 +67,13 @@
             return resp.json();
           })
           .then(function(data) {
-              
+          {% cache 5000 line_points1 %}
             getPoints(data);
-            
+          {% endcache %}  
             L.geoJSON({"type": "LineString","coordinates": linePoints}, 
                 {style: {"color": "red", "weight": 15, "opacity": 0.65}, 
                 onEachFeature: function onEachFeature(feature, layer) {
-                    var content = `<button id="closeButton">close</button><br><br><h1>FIRST QUEST</h1><h4>LEVELS: ${levels}</h4><p>First quest description</p><h3>YOUR PROGRESS: {{ progress1 }}%</h3><a href="{% url 'first' %}"><button>Go to First Quest</button></a>`;
+                    var content = `<button id="closeButton">close</button><br><br><h1>FIRST QUEST</h1><h4>TOTAL LEVELS: ${levels}</h4><p>First quest description</p><h3>YOUR PROGRESS: {{ progress1 }}%</h3><a href="{% url 'first' %}"><button>Go to First Quest</button></a>`;
                     layer.on('click', function(){
                         sidebar.show();
                         sidebar.setContent(content);
@@ -88,13 +90,13 @@
             return resp.json();
           })
           .then(function(data) {
-            
+            {% cache 5000 line_points2 %}
             getPoints(data);
-
+            {% endcache %}
             L.geoJSON({"type": "LineString","coordinates": linePoints}, 
                 {style: {"color": "blue", "weight": 15, "opacity": 0.65}, 
                 onEachFeature: function onEachFeature(feature, layer) {
-                    var content = `<button id="closeButton">close</button><br><br><h1>SECOND QUEST</h1><h4>LEVELS: ${levels}</h4><p>Second quest description</p><h3>YOUR PROGRESS: {{ progress2 }}%</h3><a href="{% url 'second' %}"><button>Go to Second Quest</button></a>`;
+                    var content = `<button id="closeButton">close</button><br><br><h1>SECOND QUEST</h1><h4>TOTAL LEVELS: ${levels}</h4><p>Second quest description</p><h3>YOUR PROGRESS: {{ progress2 }}%</h3><a href="{% url 'second' %}"><button>Go to Second Quest</button></a>`;
                     layer.on('click', function(){
                         sidebar.show();
                         sidebar.setContent(content);

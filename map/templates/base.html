@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% load cache %}
-{% cache 5000 scripts %}
+{% cache 5000 statics %}
 {% load leaflet_tags %}
 {% load static from staticfiles %}
 <html lang="en">
@@ -15,8 +15,6 @@
     <link rel="stylesheet" href="{% static "css/style.css" %}" />
 {% endcache %}
     <script type="text/javascript">
-        {% block geodata %}
-        {% endblock %}
       
         var LeafIcon = L.Icon.extend({
             options: {
@@ -66,7 +64,7 @@
         var toLocate = L.easyButton('<img class="locate" src="{%static 'map/images/locate.png'%}">', function(btn, map){
           locateUser();
           
-          route.getPlan().setWaypoints([userlatlng,L.latLng(center[0],center[1])]);
+          route.getPlan().setWaypoints([userlatlng,{{center}}]);
           route.route();
         });
 
@@ -76,16 +74,16 @@
           <br>
           <button id="closeButton">close</button>
           <br>
-          <h2>Quest: {%block quest%}{%endblock%}</h2>
-          <h3>LEVEL: {{ level }} 
-          ({% block progress %}{% endblock %}) </h3>
+          <h3>{{ user.username }} ({{ user.get_full_name }})</h3>
+          <h2>Quest: {% block quest %}{% endblock %}</h2>
+          <h3>LEVEL: {{ level }}
+          {% block progress %}{% endblock %} </h3>
           {% if level == 1%}
           <h3>Hello! You need to buy this quest ;)
           You can do this by click on your first search area and follow instructions.
           Good luck!</h3>
           <p>Tip: to FULLSCREEN the map click on left bottom button after you close this window.</p>
           {% endif %}
-          <h3>{{ user.username }} ({{ user.get_full_name }})</h3>
           <h4>YOUR TOTAL PROGRESS:</h4>
           <ul>
           <li><a href="{% url 'first'%}">First Quest level</a>: {{ user.profile.first_quest }} ({{ progress1 }}%)</li>
@@ -95,8 +93,7 @@
           
           sidebar.show();
           sidebar.setContent(content);
-          document.getElementById("closeButton").onclick = hideSidebarFly;
-          
+          document.getElementById("closeButton").onclick = hideSidebar
         },{ id: 'profileButton', position: 'bottomright' });
         
         map.addControl(profileButton);
@@ -114,26 +111,23 @@
         function hideSidebar(){
           sidebar.hide();
         }
+        
         {% if level == 1 %}
-        count = 1;
-        {% else %}
-        count = 0;
+        document.getElementById('profileButton').click();
         {% endif %}
         
-        function hideSidebarFly(){
-          
-          sidebar.hide();
-          if (count){
-            count = 0;
-            document.getElementById('toPolygonButton').click();
-          }
-        }
-        
         {% block content %}
-        
         {% endblock %}
-        // Download GeoJSON data with Ajax
         
+        toPolygon = L.easyButton(
+          '<img class="locate" src="{% static 'map/images/toquest.png' %}">', 
+          function(btn, map){
+            map.flyTo({{center}});
+          },
+          { id: 'toPolygonButton' });
+          
+        buttons.push(toPolygon);
+        L.easyBar(buttons).addTo(map);
           
       });
       
@@ -143,30 +137,13 @@
   </head>
   <body>
     
-    {% leaflet_map "main" %}
+    {% leaflet_map "main" settings_overrides=override %}
     
-    {% if user.is_authenticated and test == 1 %}
     
-    <div class="user">{{ user.get_username }} {{level}} 
-    <a href="{% url 'first1' %}">ToLevel2</a> 
-    <a href="{% url 'first2' %}">ToLevel3</a> 
-    <a href="{% url 'firsttestreset' %}">Restart</a>
+    <div class="user" id="users">{{ user.get_username }} {{level}} 
+    <a href="{% url 'levelUp' quest=quest %}">ToLevel2</a> 
+    <a href="{% url 'testreset' quest=quest %}">Restart</a>
     </div>
-    
-    {% elif user.is_authenticated and test == 2 %}
-    
-    <div class="user">{{ user.get_username }} {{level}} 
-    <a href="{% url 'second1' %}">ToLevel2</a> 
-    <a href="{% url 'second2' %}">ToLevel3</a> 
-    <a href="{% url 'secondtestreset' %}">Restart</a>
-    </div>
-    
-    {% else %}
-    
-    <div class="user"><a href="https://map-imgvoid.c9users.io/account/login/">Login</a></div>
-    
-    {% endif %} 
-    
 
     
   <div id="sidebar">

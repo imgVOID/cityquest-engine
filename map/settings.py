@@ -61,10 +61,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.cache.UpdateCacheMiddleware',
-    # ... another middlewares
     'django.middleware.common.CommonMiddleware',
-    # ... rest of middlewares
 ]
 
 ROOT_URLCONF = 'map.urls'

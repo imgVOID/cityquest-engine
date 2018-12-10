@@ -27,17 +27,12 @@ from .models import FirstQuestPolygon, FirstQuestMarker, SecondQuestPolygon, Sec
 
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    url(r'^accounts/', include('django.contrib.auth.urls')),
-#    url(r'^$', views.home, name='home'),
-    url(r'^first/', views.first, name='first'),
-    url(r'^second/', views.second, name='second'),
-    url(r'^first1/', views.first1, name='first1'),
-    url(r'^first2/', views.first2, name='first2'),
-    url(r'^second1/', views.second1, name='second1'),
-    url(r'^second2/', views.second2, name='second2'),
-    url(r'^firsttestreset/', views.firsttestreset, name='firsttestreset'),
-    url(r'^secondtestreset/', views.secondtestreset, name='secondtestreset'),
+    url(r'^admin/$', admin.site.urls),
+    url(r'^accounts/$', include('django.contrib.auth.urls')),
+    url(r'^first/$', views.first, name='first'),
+    url(r'^second/$', views.second, name='second'),
+    url(r'^levelUp/(?P<quest>\w+)$', views.levelUp, name='levelUp'),
+    url(r'^testreset/(?P<quest>\w+)$', views.testreset, name='testreset'),
     url(r'^$', cache_page(600)(views.quest_list), name='quest_list'),
     url(r'^1marker.geojson$', views.marker1, name='1marker'),
     url(r'^1polygon.geojson$', views.polygon1, name='1polygon'),
