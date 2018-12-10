@@ -10,7 +10,7 @@ First Quest
 
 {% block content %}
 {% load cache %}
-{% cache 500 mapdata_first request.user.username %}
+{% cache 50000 mapdata_first request.user.username %}
         fetch('{% url "1polygon" %}')
           .then(function(resp) {
             return resp.json();

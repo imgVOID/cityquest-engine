@@ -33,9 +33,19 @@ def first(request):
         center = (sum((p[1] for p in polygon_points)) / len(polygon_points), sum((p[0] for p in polygon_points)) / len(polygon_points))
         cache.set(redis_key, center)
     override = {'DEFAULT_CENTER': center}
+    
+    redis_key = 'progress1_'+str(user.username)
+    first_quest_progress = cache.get(redis_key)
+    if not first_quest_progress:
+        first_quest_progress = int(float(user.profile.first_quest)/float(FirstQuestPolygon.objects.all().count())*100.0)
+        cache.set(redis_key, first_quest_progress)
 
-    first_quest_progress = int(float(user.profile.first_quest)/float(FirstQuestPolygon.objects.all().count())*100.0)
-    second_quest_progress = int(float(user.profile.second_quest)/float(SecondQuestPolygon.objects.all().count())*100.0)
+    redis_key = 'progress2_'+str(user.username)
+    second_quest_progress = cache.get(redis_key)
+    if not second_quest_progress:
+        second_quest_progress = int(float(user.profile.second_quest)/float(SecondQuestPolygon.objects.all().count())*100.0)
+        cache.set(redis_key, first_quest_progress)
+
     route_type = ['walking','cycling','driving']
     return render(request, 'first_quest.html', {'level':level, 'quest':quest, 'progress1':first_quest_progress, 'progress2':second_quest_progress, 'routeTypes':route_type, 'override':override, 'center':center})
 
@@ -57,8 +67,18 @@ def second(request):
         cache.set(redis_key, center)
     override = {'DEFAULT_CENTER': center}
     
-    first_quest_progress = int(float(user.profile.first_quest)/float(FirstQuestPolygon.objects.all().count())*100.0)
-    second_quest_progress = int(float(user.profile.second_quest)/float(SecondQuestPolygon.objects.all().count())*100.0)
+    redis_key = 'progress1_'+str(user.username)
+    first_quest_progress = cache.get(redis_key)
+    if not first_quest_progress:
+        first_quest_progress = int(float(user.profile.first_quest)/float(FirstQuestPolygon.objects.all().count())*100.0)
+        cache.set(redis_key, first_quest_progress)
+
+    redis_key = 'progress2_'+str(user.username)
+    second_quest_progress = cache.get(redis_key)
+    if not second_quest_progress:
+        second_quest_progress = int(float(user.profile.second_quest)/float(SecondQuestPolygon.objects.all().count())*100.0)
+        cache.set(redis_key, first_quest_progress)
+
     route_type = ['walking','cycling','driving']
     return render(request, 'second_quest.html', {'level':level, 'quest':quest, 'progress1':first_quest_progress, 'progress2':second_quest_progress, 'routeTypes':route_type, 'override':override, 'center':center})
 
@@ -66,8 +86,18 @@ def second(request):
 def quest_list(request):
     user = request.user
     override = {'DEFAULT_ZOOM': 12,'TILES':[('Black','https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {'attribution': ''}),('Watercolor','http://{s}.tile.stamen.com/watercolor/{z}/{x}/{y}.jpg', {'attribution': ''})]}
-    first_quest_progress = int(float(user.profile.first_quest)/float(FirstQuestPolygon.objects.all().count())*100.0)
-    second_quest_progress = int(float(user.profile.second_quest)/float(SecondQuestPolygon.objects.all().count())*100.0)
+
+    redis_key = 'progress1_'+str(user.username)
+    first_quest_progress = cache.get(redis_key)
+    if not first_quest_progress:
+        first_quest_progress = int(float(user.profile.first_quest)/float(FirstQuestPolygon.objects.all().count())*100.0)
+        cache.set(redis_key, first_quest_progress)
+
+    redis_key = 'progress2_'+str(user.username)
+    second_quest_progress = cache.get(redis_key)
+    if not second_quest_progress:
+        second_quest_progress = int(float(user.profile.second_quest)/float(SecondQuestPolygon.objects.all().count())*100.0)
+        cache.set(redis_key, first_quest_progress)
     return render(request, 'quest_list.html', {'progress1':first_quest_progress, 'progress2':second_quest_progress, 'override':override})
 
 @login_required(login_url='/accounts/login/')
@@ -82,10 +112,12 @@ def levelUp(request, quest):
                 elif user.profile.first_quest == 2:
                     user.profile.first_quest = 3
                     user.save()
-                key = make_template_fragment_key('mapdata_first',[request.user.username])
-                cache.delete(key)
-                key = 'center1_'+str(user.username)
-                cache.delete(key)
+                redis_key = make_template_fragment_key('mapdata_first',[request.user.username])
+                cache.delete(redis_key)
+                redis_key = 'center1_'+str(user.username)
+                cache.delete(redis_key)
+                redis_key = 'progress1_'+str(user.username)
+                cache.delete(redis_key)
                 return redirect('/first/')
             else:
                 return redirect('/first/')
@@ -101,6 +133,8 @@ def levelUp(request, quest):
                 cache.delete(key)
                 key = 'center2_'+str(user.username)
                 cache.delete(key)
+                redis_key = 'progress2_'+str(user.username)
+                cache.delete(redis_key)
                 return redirect('/second/')
             else:
                 return redirect('/second/')
