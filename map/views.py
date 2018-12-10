@@ -31,20 +31,20 @@ def first(request):
     if not center:
         polygon_points = FirstQuestPolygon.objects.get(level=level).geom['coordinates'][0]
         center = (sum((p[1] for p in polygon_points)) / len(polygon_points), sum((p[0] for p in polygon_points)) / len(polygon_points))
-        cache.set(redis_key, center)
+        cache.set(redis_key, center, timeout=60000)
     override = {'DEFAULT_CENTER': center}
     
     redis_key = 'progress1_'+str(user.username)
     first_quest_progress = cache.get(redis_key)
     if not first_quest_progress:
         first_quest_progress = int(float(user.profile.first_quest)/float(FirstQuestPolygon.objects.all().count())*100.0)
-        cache.set(redis_key, first_quest_progress)
+        cache.set(redis_key, first_quest_progress, timeout=60000)
 
     redis_key = 'progress2_'+str(user.username)
     second_quest_progress = cache.get(redis_key)
     if not second_quest_progress:
         second_quest_progress = int(float(user.profile.second_quest)/float(SecondQuestPolygon.objects.all().count())*100.0)
-        cache.set(redis_key, first_quest_progress)
+        cache.set(redis_key, first_quest_progress, timeout=60000)
 
     route_type = ['walking','cycling','driving']
     return render(request, 'first_quest.html', {'level':level, 'quest':quest, 'progress1':first_quest_progress, 'progress2':second_quest_progress, 'routeTypes':route_type, 'override':override, 'center':center})
@@ -64,20 +64,20 @@ def second(request):
     if not center:
         polygon_points = SecondQuestPolygon.objects.get(level=level).geom['coordinates'][0]
         center = list((sum((p[1] for p in polygon_points)) / len(polygon_points), sum((p[0] for p in polygon_points)) / len(polygon_points)))
-        cache.set(redis_key, center)
+        cache.set(redis_key, center, timeout=60000)
     override = {'DEFAULT_CENTER': center}
     
     redis_key = 'progress1_'+str(user.username)
     first_quest_progress = cache.get(redis_key)
     if not first_quest_progress:
         first_quest_progress = int(float(user.profile.first_quest)/float(FirstQuestPolygon.objects.all().count())*100.0)
-        cache.set(redis_key, first_quest_progress)
+        cache.set(redis_key, first_quest_progress, timeout=60000)
 
     redis_key = 'progress2_'+str(user.username)
     second_quest_progress = cache.get(redis_key)
     if not second_quest_progress:
         second_quest_progress = int(float(user.profile.second_quest)/float(SecondQuestPolygon.objects.all().count())*100.0)
-        cache.set(redis_key, first_quest_progress)
+        cache.set(redis_key, first_quest_progress, timeout=60000)
 
     route_type = ['walking','cycling','driving']
     return render(request, 'second_quest.html', {'level':level, 'quest':quest, 'progress1':first_quest_progress, 'progress2':second_quest_progress, 'routeTypes':route_type, 'override':override, 'center':center})
@@ -91,13 +91,13 @@ def quest_list(request):
     first_quest_progress = cache.get(redis_key)
     if not first_quest_progress:
         first_quest_progress = int(float(user.profile.first_quest)/float(FirstQuestPolygon.objects.all().count())*100.0)
-        cache.set(redis_key, first_quest_progress)
+        cache.set(redis_key, first_quest_progress, timeout=60000)
 
     redis_key = 'progress2_'+str(user.username)
     second_quest_progress = cache.get(redis_key)
     if not second_quest_progress:
         second_quest_progress = int(float(user.profile.second_quest)/float(SecondQuestPolygon.objects.all().count())*100.0)
-        cache.set(redis_key, first_quest_progress)
+        cache.set(redis_key, first_quest_progress, timeout=60000)
     return render(request, 'quest_list.html', {'progress1':first_quest_progress, 'progress2':second_quest_progress, 'override':override})
 
 @login_required(login_url='/accounts/login/')
@@ -171,7 +171,7 @@ def marker1(request):
     marker1 = cache.get(redis_key)
     if not marker1:
        marker1 = GeoJSONSerializer().serialize(FirstQuestMarker.objects.all(), use_natural_keys=True, with_modelname=True)
-       cache.set(redis_key, marker1)
+       cache.set(redis_key, marker1, timeout=None)
     return JsonResponse(json.loads(marker1))
 
 def polygon1(request):
@@ -179,7 +179,7 @@ def polygon1(request):
     polygon1 = cache.get(redis_key)
     if not polygon1:
         polygon1 = GeoJSONSerializer().serialize(FirstQuestPolygon.objects.all(), use_natural_keys=True, with_modelname=False)
-        cache.set(redis_key, polygon1)
+        cache.set(redis_key, polygon1, timeout=None)
     return JsonResponse(json.loads(polygon1))
     
 def marker2(request):
@@ -187,7 +187,7 @@ def marker2(request):
     marker2 = cache.get(redis_key)  
     if not marker2:
        marker2 = GeoJSONSerializer().serialize(FirstQuestMarker.objects.all(), use_natural_keys=True, with_modelname=True)
-       cache.set(redis_key, marker1)
+       cache.set(redis_key, marker1, timeout=None)
     return JsonResponse(json.loads(marker1))
 
 def polygon2(request):
@@ -195,6 +195,6 @@ def polygon2(request):
     polygon2 = cache.get(redis_key)
     if not polygon2:
        polygon2 = GeoJSONSerializer().serialize(SecondQuestPolygon.objects.all(), use_natural_keys=True, with_modelname=False)
-       cache.set(redis_key, polygon2)
+       cache.set(redis_key, polygon2, timeout=None)
     return JsonResponse(json.loads(polygon2))
     

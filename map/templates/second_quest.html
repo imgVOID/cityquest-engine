@@ -10,7 +10,7 @@ Second Quest
 
 {% block content %}
 {% load cache %}
-{% cache 50000 mapdata_second request.user.username %}
+{% cache 60000 mapdata_second request.user.username %}
 fetch('{% url "2polygon" %}')
     .then(function(resp) {
         return resp.json();
