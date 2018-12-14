@@ -88,7 +88,8 @@
           <ul>
           <li><a href="{% url 'first'%}">First Quest level</a>: {{ user.profile.first_quest }} ({{ progress1 }}%)</li>
           <li><a href="{% url 'second'%}">Second Quest level</a>: {{ user.profile.second_quest }} ({{ progress2 }}%)</li>
-          </ul>`;
+          </ul>
+          <a href="{% url 'logout' %}"><button id="logoutButton">Logout</button></a>`;
           
           
           sidebar.show();

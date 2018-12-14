@@ -15,8 +15,25 @@ from django.core.cache import cache
 from django.views.decorators.cache import cache_page
 from django.core.cache.utils import make_template_fragment_key
 
+from forms import SignUpForm
 
-@login_required(login_url='/accounts/login/')
+
+def signup(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            return redirect('quest_list')
+    else:
+        form = SignUpForm()
+    return render(request, 'registration/signup.html', {'form': form})
+    
+
+@login_required(login_url='/login/')
 def first(request):
     user = request.user
     quest='first_quest'
@@ -49,7 +66,7 @@ def first(request):
     route_type = ['walking','cycling','driving']
     return render(request, 'first_quest.html', {'level':level, 'quest':quest, 'progress1':first_quest_progress, 'progress2':second_quest_progress, 'routeTypes':route_type, 'override':override, 'center':center})
 
-@login_required(login_url='/accounts/login/')
+@login_required(login_url='/login/')
 def second(request):
     user = request.user
     level = None
@@ -82,7 +99,7 @@ def second(request):
     route_type = ['walking','cycling','driving']
     return render(request, 'second_quest.html', {'level':level, 'quest':quest, 'progress1':first_quest_progress, 'progress2':second_quest_progress, 'routeTypes':route_type, 'override':override, 'center':center})
 
-@login_required(login_url='/accounts/login/')
+@login_required(login_url='/login/')
 def quest_list(request):
     user = request.user
     override = {'DEFAULT_ZOOM': 12,'TILES':[('Black','https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {'attribution': ''}),('Watercolor','http://{s}.tile.stamen.com/watercolor/{z}/{x}/{y}.jpg', {'attribution': ''})]}
@@ -100,7 +117,7 @@ def quest_list(request):
         cache.set(redis_key, first_quest_progress, timeout=60000)
     return render(request, 'quest_list.html', {'progress1':first_quest_progress, 'progress2':second_quest_progress, 'override':override})
 
-@login_required(login_url='/accounts/login/')
+@login_required(login_url='/login/')
 def levelUp(request, quest):
     user = request.user
     if user.is_authenticated:
@@ -143,7 +160,7 @@ def levelUp(request, quest):
     else:
         return redirect('/')
 
-@login_required(login_url='/accounts/login/')
+@login_required(login_url='/login/')
 def testreset(request, quest):
     user = request.user
     if user.is_authenticated:

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+import os.path
 from django.conf.global_settings import LOGIN_REDIRECT_URL
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -132,7 +133,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
+STATIC_ROOT = ''
+
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = ( os.path.join('static'), )
 
 CACHES = {
     'default': {
@@ -140,7 +145,6 @@ CACHES = {
         'LOCATION': '127.0.0.1:6379',
     },
 }
-
 
 
 LEAFLET_CONFIG = {
@@ -166,8 +170,8 @@ LEAFLET_CONFIG = {
             'auto-include': True,
         },
         'sidebar': {
-            'css': '/map/static/css/L.Control.Sidebar.css',
-            'js': '/map/static/js/L.Control.Sidebar.js',
+            'css': 'css/L.Control.Sidebar.css',
+            'js': 'js/L.Control.Sidebar.js',
             'auto-include': True,
         },
         'routing': {

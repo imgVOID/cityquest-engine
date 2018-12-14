@@ -18,18 +18,20 @@
         var map = event.detail.map;
         map.addControl(new L.Control.Fullscreen({ position: 'bottomleft' }));
         
-        var profileButton = L.easyButton('<img class="profileButtonImage" src="{%static 'images/user.png'%}">', function(btn, map){
+        var profileButton = L.easyButton('<img class="profileButtonImage" src="{%static 'map/images/user.png'%}">', function(btn, map){
           
           var content = `
           <br>
-          <button id="closeButton">close</button>
+          <button id="closeButton">Close</button>
           <br>
           <h3>{{ user.username }} ({{ user.get_full_name }})</h3>
+          
           <h4>YOUR TOTAL PROGRESS:</h4>
           <ul>
           <li><a href="{% url 'first'%}">First Quest level</a>: {{ user.profile.first_quest }} ({{ progress1 }}%)</li>
           <li><a href="{% url 'second'%}">Second Quest level</a>: {{ user.profile.second_quest }} ({{ progress2 }}%)</li>
-          </ul>`;
+          </ul>
+          <a href="{% url 'logout' %}"><button id="logoutButton">Logout</button></a>`;
           
           
           sidebar.show();
@@ -62,12 +64,13 @@
         }
         
         // Download GeoJSON data with Ajax
+        {% cache 60000 line_points1 %}
         fetch('1marker.geojson')
           .then(function(resp) {
             return resp.json();
           })
           .then(function(data) {
-          {% cache 5000 line_points1 %}
+          
             getPoints(data);
           {% endcache %}  
             L.geoJSON({"type": "LineString","coordinates": linePoints}, 
@@ -84,13 +87,13 @@
             
           });
           
-          
+        {% cache 60000 line_points2 %}
         fetch('2marker.geojson')
           .then(function(resp) {
             return resp.json();
           })
           .then(function(data) {
-            {% cache 5000 line_points2 %}
+            
             getPoints(data);
             {% endcache %}
             L.geoJSON({"type": "LineString","coordinates": linePoints}, 

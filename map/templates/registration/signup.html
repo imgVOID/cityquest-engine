@@ -1,0 +1,65 @@
+{% load static from staticfiles %}
+<head>
+  <meta name='viewport' content='initial-scale=1.0, maximum-scale=1.0, user-scalable=1'/>
+  <link rel="stylesheet" href="{% static 'css/signup_form.css' %}" />
+  <!-- Latest compiled and minified CSS -->
+  <script
+  src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+  integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
+  crossorigin="anonymous"></script>
+ 
+  
+</head>
+
+<div class="container">
+  <header>
+		<a href="{% url 'quest_list' %}" class="logo"><h1 class="text-center">CityQuest</h1></a>
+	</header>
+	
+	<form class="registration-form" method="post">
+	  {% csrf_token %}		
+	  <label class="col-one-half">
+			<span class="label-text">First Name</span>
+			<input type="text" name="firstName">
+		</label>
+		<label class="col-one-half">
+			<span class="label-text">Last Name</span>
+			<input type="text" name="last_name">
+		</label>
+		<label>
+			<span class="label-text">Username</span>
+			<input type="text" name="username">
+		</label>
+		<label>
+			<span class="label-text">Email</span>
+			<input type="text" name="email">
+		</label>
+		<label class="password no-repeat col-one-half" id="no-repeat">
+			<span class="label-text"><p>Password</p></span>
+			{{ form.password1 }}
+		</label>
+		<label class="password col-one-half" id="repeat">
+			<span class="label-text"><p>Repeat password</p></span>
+			{{ form.password2 }}
+		</label>
+		<p class="text-center errorText">
+		{% for field in form %}
+		{% for error in field.errors %}
+          {{ error }}
+        {% endfor %}
+        {% endfor %}
+        </p>
+		<br><h1></h1>
+		<div class="text-center buttonsWrapper">
+			<a class="anotherButtons left">HOME</a>
+		<button class="submit gradient-border text-center go width" name="login" type="submit" value="registration" >Sign up</button>
+		<a class="anotherButtons right">SIGNIN</a>
+		</div>
+		
+		
+		
+	</form>
+</div>
+
+
+ <script type="text/javascript" src="{% static 'js/signup_form.js' %}"></script> 

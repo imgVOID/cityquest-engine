@@ -1,0 +1,65 @@
+{% load static from staticfiles %}
+<head>
+  <link rel="stylesheet" href="{% static 'css/signup_form.css' %}" />
+  <!-- Latest compiled and minified CSS -->
+  <script
+  src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+  integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
+  crossorigin="anonymous"></script>
+ 
+  
+</head>
+
+<div class="container">
+  <header>
+		<h1 class="text-center">Registration</h1>
+	</header>
+	
+	<form class="registration-form" method="post">
+	  {% csrf_token %}		
+	  <label class="col-one-half">
+			<span class="label-text">First Name</span>
+			<input type="text" name="firstName">
+		</label>
+		<label class="col-one-half">
+			<span class="label-text">Last Name</span>
+			<input type="text" name="lastName">
+		</label>
+		<label>
+			<span class="label-text">Username</span>
+			<input type="text" name="username" id="id_username">
+		</label>
+		<label>
+			<span class="label-text">Email</span>
+			<input type="text" name="email">
+		</label>
+		<label class="password">
+			<span class="label-text">Password</span>
+			<button class="toggle-visibility" title="toggle password visibility" tabindex="-1">
+				<span class="showPassword">SHOW</span>
+			</button>
+			<input id="id_password1" type="password" name="password1">
+			<input id="id_password2" type="password" name="password2">
+		</label>
+		<p class="text-center errorText">{% for error in field.errors %}
+          <p style="color: red">{{ error }}</p>
+        {% endfor %}</p>
+		
+		<div class="text-center buttonsWrapper">
+		<button class="submit gradient-border text-center go" name="login" type="submit" value="Register" >Sign up</button>
+		</div>
+		<div class="text-center buttonsWrapper">
+		  <a class="anotherButtons left">FORGOT PASSWORD?</a>
+			
+			<a class="anotherButtons right">SIGN UP</a>
+		</div>
+		
+		
+		
+		
+		
+	</form>
+</div>
+
+
+ <script type="text/javascript" src="{% static 'js/signup_form.js' %}"></script>

@@ -1,34 +1,47 @@
+{% load static from staticfiles %}
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <link rel="stylesheet" href="{% static 'css/login_form.css' %}" />
+  <!-- Latest compiled and minified CSS -->
+  <script
+  src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+  integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
+  crossorigin="anonymous"></script>
+ 
+  
+</head>
 
-{% if form.errors %}
-<p>Your username and password didn't match. Please try again.</p>
-{% endif %}
-
-{% if next %}
-    {% if user.is_authenticated %}
-    <p>Your account doesn't have access to this page. To proceed,
-    please login with an account that has access.</p>
-    {% else %}
-    <p>Please login to see this page.</p>
-    {% endif %}
-{% endif %}
-
-<form method="post" action="{% url 'login' %}">
-{% csrf_token %}
-
-<div>
-  <td>{{ form.username.label_tag }}</td>
-  <td>{{ form.username }}</td>
+<div class="container">
+  <header>
+		<h1 class="text-center">Welcome!</h1>
+	</header>
+	
+	<form class="registration-form" method="post" action="{% url 'login' %}">
+	  {% csrf_token %}
+		<label>
+			<span class="label-text">Username</span>
+			<input type="text" name="username">
+		</label>
+		<label class="password">
+			<span class="label-text">Password</span>
+			<button class="toggle-visibility" title="toggle password visibility" tabindex="-1">
+				<span class="showPassword">SHOW</span>
+			</button>
+			<input type="password" name="password">
+		</label>
+		<p class="text-center errorText">{% if form.errors %}Username and password didn't match.{% endif %}</p>
+		
+		<div class="text-center buttonsWrapper">
+		<button class="submit gradient-border text-center go" name="login">Sign in</button>
+		</div>
+		<div class="text-center buttonsWrapper">
+		  <a class="anotherButtons left">FORGOT PASSWORD?</a>
+			
+			<a class="anotherButtons right">SIGN UP</a>
+		</div>
+		
+	</form>
 </div>
-<div>
-  <td>{{ form.password.label_tag }}</td>
-  <td>{{ form.password }}</td>
-</div>
 
-<div>
-  <input type="submit" value="login" />
-  <input type="hidden" name="next" value="{{ next }}" />
-</div>
-</form>
 
-{# Assumes you setup the password_reset view in your URLconf #}
-<p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+ <script type="text/javascript" src="{% static 'js/login_form.js' %}"></script>
