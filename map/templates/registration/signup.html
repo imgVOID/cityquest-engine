@@ -4,9 +4,7 @@
   <link rel="stylesheet" href="{% static 'css/signup_form.css' %}" />
   <!-- Latest compiled and minified CSS -->
   <script
-  src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-  integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
-  crossorigin="anonymous"></script>
+  src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
  
   
 </head>
@@ -15,20 +13,21 @@
   <header>
 		<a href="{% url 'quest_list' %}" class="logo"><h1 class="text-center">CityQuest</h1></a>
 	</header>
-	
+	<script type='text/javascript'>
+</script>
 	<form class="registration-form" method="post">
 	  {% csrf_token %}		
 	  <label class="col-one-half">
 			<span class="label-text">First Name</span>
 			<input type="text" name="firstName">
 		</label>
-		<label class="col-one-half">
-			<span class="label-text">Last Name</span>
+		<label class="col-one-half" align="right">
+			<span class="label-text rightField" align="right">Last Name</span> 
 			<input type="text" name="last_name">
 		</label>
 		<label>
 			<span class="label-text">Username</span>
-			<input type="text" name="username">
+			<input type="text" name="username" id="id_username">
 		</label>
 		<label>
 			<span class="label-text">Email</span>
@@ -38,7 +37,7 @@
 			<span class="label-text"><p>Password</p></span>
 			{{ form.password1 }}
 		</label>
-		<label class="password col-one-half" id="repeat">
+		<label class="password col-one-half rightField" id="repeat">
 			<span class="label-text"><p>Repeat password</p></span>
 			{{ form.password2 }}
 		</label>
@@ -63,3 +62,4 @@
 
 
  <script type="text/javascript" src="{% static 'js/signup_form.js' %}"></script> 
+ 

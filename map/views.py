@@ -4,10 +4,10 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 
 from .models import FirstQuestPolygon, SecondQuestPolygon, FirstQuestMarker, SecondQuestMarker
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 
 import json
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.core.serializers import serialize
 from djgeojson.serializers import Serializer as GeoJSONSerializer
 
@@ -32,6 +32,14 @@ def signup(request):
         form = SignUpForm()
     return render(request, 'registration/signup.html', {'form': form})
     
+def validate_username(request):
+    username = request.GET.get('username', None)
+    usernames = User.objects.all()
+    data = {
+        'is_taken': usernames.filter(username__iexact=username).exists()
+    }
+    return JsonResponse(data)
+
 
 @login_required(login_url='/login/')
 def first(request):

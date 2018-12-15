@@ -70,6 +70,7 @@ form button.submit{
 	font-family: 'Cookie', cursive;
 	color: #333;
 	font-weight: bold;
+	margin-top: 0.2rem;
 }
 form button:hover,
 form button:focus,
@@ -136,6 +137,7 @@ form label span.label-text{
 	text-transform: uppercase;
 	-webkit-transition: all 0.25s;
 	transition: all 0.25s;
+	text-shadow: 0 0 2px white;
 }
 form label.checkbox{
 	border-bottom: 0;
@@ -207,17 +209,21 @@ html{
 	text-align: center;
 }
 
+
 .anotherButtons {
 	margin-top: 0.75rem;
 	display: inline-block;
-	font-size: 0.75rem;
+	font-size: 0.7rem;
 	background: rgba(227, 227, 227, 0);
 	line-height: 1rem;
 	-webkit-transition: all 0.25s;
 	transition: all 0.25s;
 	opacity: 1;
+	box-sizing: border-box;
 	font-weight: bold;
+	color: #333;
 	text-decoration: overline;
+	text-shadow: 0 0 2px white;
 }
 
 .anotherButtons:hover {
@@ -226,22 +232,30 @@ html{
 }
 
 .left {
-	margin-right: 5vw;
+	width: 20%;
 	text-align: left;
+	margin-right:10%;
+	margin-left: -5%;
 }
 
 .right {
-	margin-left: 5vw;
+	width: 20%;
 	text-align: right;
+	margin-left:10%;
+	margin-right:-5%;
 }
 
 .buttonsWrapper {
 	margin-top: 1rem;
+	width: 100%;
+	box-sizing: border-box;
+	display: block;
 }
 
 .errorText {
 	color: rgb(192,57,43);
 	font-size: 0.75rem;
+	margin-bottom: -0.45em;
 }
 
 .showPassword {

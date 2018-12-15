@@ -29,15 +29,11 @@
 			</button>
 			<input type="password" name="password">
 		</label>
-		<p class="text-center errorText">{% if form.errors %}Username and password didn't match.{% endif %}</p>
-		
+		<p class="text-center errorText">{% if form.errors %}username and password didn't match.{% endif %}</p>
 		<div class="text-center buttonsWrapper">
-		<button class="submit gradient-border text-center go" name="login">Sign in</button>
-		</div>
-		<div class="text-center buttonsWrapper">
-		  <a class="anotherButtons left">FORGOT PASSWORD?</a>
-			
-			<a class="anotherButtons right">SIGN UP</a>
+			<a class="anotherButtons left">FORGOT?</a>
+		<button class="submit gradient-border text-center go width" name="login" type="submit" value="registration" >Sign in</button>
+		<a class="anotherButtons right" href="{% url 'signup' %}">SIGNUP</a>
 		</div>
 		
 	</form>

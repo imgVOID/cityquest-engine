@@ -71,6 +71,7 @@ form button.submit{
 	color: #333;
 	font-weight: bold;
 	width: 50%;
+	margin-top: 0.2rem;
 }
 form button:hover,
 form button:focus,
@@ -107,14 +108,22 @@ form label{
 	-webkit-transition: all 0.25s;
 	transition: all 0.25s;
 }
+
 form label.col-one-half{
 	float: left;
 	width: 50%;
 }
+
 form label.col-one-half:nth-of-type(even){
 	border-left: 1px solid #333;
 	padding-left: 0.25em;
 }
+
+.rightField {
+	text-align: right;
+	padding-right: 0.5rem;
+}
+
 form label input{
 	background: none;
 	border: none;
@@ -133,7 +142,7 @@ form label span.label-text{
 	display: block;
 	font-size: 0.5em;
 	font-weight: bold;
-	padding-left: 0.5em;
+	padding-left: 0.5rem;
 	text-transform: uppercase;
 	-webkit-transition: all 0.25s;
 	transition: all 0.25s;

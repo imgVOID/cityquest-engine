@@ -24,7 +24,12 @@
             });
         }
     });
+    
+    
+
 })(jQuery);
+
+var lastUsername = [false,false];
 
 formValidation = {
 	init: function(){
@@ -51,12 +56,19 @@ formValidation = {
 	},
 	bindEvents: function(){
 		this.$firstName.donetyping(this.validateFirstNameHandler.bind(this));
+		this.$firstName.focusout(this.validateFirstNameHandler.bind(this));
 		this.$lastName.donetyping(this.validateLastNameHandler.bind(this));
+		this.$lastName.focusout(this.validateLastNameHandler.bind(this));
+		this.$username.focusout(this.validateUsernameHandler.bind(this));
 		this.$username.donetyping(this.validateUsernameHandler.bind(this));
+		this.$email.focusout(this.validateEmailHandler.bind(this));
 		this.$email.donetyping(this.validateEmailHandler.bind(this));
 		this.$password.donetyping(this.validatePasswordHandler.bind(this));
+		this.$password.focus(this.validatePasswordHandler.bind(this));
+		this.$password.focusout(this.validatePasswordHandler.bind(this));
 		this.$passwordRepeat.donetyping(this.validatePasswordRepeatHandler.bind(this));
 		this.$passwordRepeat.focus(this.validatePasswordRepeatHandler.bind(this));
+		this.$passwordRepeat.focusout(this.validatePasswordHandler.bind(this));
 		this.$passwordToggle.mousedown(this.togglePasswordVisibilityHandler.bind(this));
 		this.$passwordToggle.click(function(e){e.preventDefault()});
 		this.$form.submit(this.submitFormHandler.bind(this));
@@ -71,7 +83,7 @@ formValidation = {
 		this.validatedFields.email = this.validateText(this.$email) && this.validateEmail(this.$email);
 	},
 	validateUsernameHandler: function(){
-		this.validatedFields.username = this.validateText(this.$username);
+		this.validatedFields.username = this.validateUsername(this.$username);
 	},
 	validatePasswordHandler: function(){
 		this.validatedFields.password = this.validatePassword(this.$password);
@@ -97,7 +109,7 @@ formValidation = {
 		this.validateUsernameHandler();
 		this.validateEmailHandler();
 		this.validatePasswordHandler();
-		if(this.validatedFields.firstName && this.validatedFields.lastName && this.validatedFields.email && this.validatedFields.password){
+		if(this.validatedFields.firstName && this.validatedFields.lastName && this.validatedFields.email && this.validatedFields.password && this.validatedFields.username){
 			this.$submitButton.addClass('loading').html('<span class="loading-spinner"></span>')
 		}else{
 		    e.preventDefault();
@@ -117,7 +129,38 @@ formValidation = {
 			return true;
 		}else{
 			$input.parent().addClass('invalid');
-			$input.parent().find('span.label-text').append(' <small class="error">(Field is empty)</small>');
+			$input.parent().find('span.label-text').append(' <small class="error"> field is empty</small>');
+			return false;
+		}
+	},
+	validateUsername: function($input){
+		if($input.val() != ''){
+			if(lastUsername[0] !== $input.val()){
+				$input.parent().removeClass('invalid');
+				$input.parent().find('span.label-text small.error').remove();
+				lastUsername[0] = $input.val();
+				var username = $input.val();
+    			$.ajax({url: '/ajax/validate_username/', data: {'username': username}, dataType: 'json',
+    				success: function (data) {
+        				if (data.is_taken) {
+            				$input.parent().addClass('invalid');
+							$input.parent().find('span.label-text').append(' <small class="error"> already exists</small>');
+							lastUsername[1] = false;
+            				return false
+        				}else{
+        					lastUsername[1] = true;
+        					return true
+        				}
+    				}
+    			});
+    			
+    			return lastUsername[1]
+			}else{}
+		}else{
+			$input.parent().removeClass('invalid');
+			$input.parent().find('span.label-text small.error').remove();
+			$input.parent().addClass('invalid');
+			$input.parent().find('span.label-text').append(' <small class="error"> field is empty</small>');
 			return false;
 		}
 	},
@@ -129,7 +172,7 @@ formValidation = {
 			return true;
 		}else{
 			$input.parent().addClass('invalid');
-			$input.parent().find('span.label-text').append(' <small class="error">(Email is invalid)</small>');
+			$input.parent().find('span.label-text').append(' <small class="error"> is invalid</small>');
 			return false;
 		}
 	},

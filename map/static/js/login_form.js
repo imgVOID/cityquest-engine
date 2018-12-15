@@ -89,18 +89,18 @@ formValidation = {
 			return true;
 		}else{
 			$input.parent().addClass('invalid');
-			$input.parent().find('span.label-text').append(' <small class="error">(Field is empty)</small>');
+			$input.parent().find('span.label-text').append(' <small class="error"> is empty</small>');
 			return false;
 		}
 	},
 	validatePassword: function($input){
 			$input.parent().removeClass('invalid');
 		$input.parent().find('span.label-text small.error').remove();
-		if($input.val().length >= 5){
+		if($input.val().length >= 8){
 			return true;
 		}else{
 			$input.parent().addClass('invalid');
-			$input.parent().find('span.label-text').append(' <small class="error">(Your password must longer than 7 characters)</small>');
+			$input.parent().find('span.label-text').append(' <small class="error"> must have 8+ characters</small>');
 			return false;
 		}
 	}
