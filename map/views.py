@@ -7,7 +7,7 @@ from .models import FirstQuestPolygon, SecondQuestPolygon, FirstQuestMarker, Sec
 from django.contrib.auth.models import Group, User
 
 import json
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.core.serializers import serialize
 from djgeojson.serializers import Serializer as GeoJSONSerializer
 
@@ -34,7 +34,11 @@ def signup(request):
     
 def validate_username(request):
     username = request.GET.get('username', None)
-    usernames = User.objects.all()
+    redis_key = 'all_users'
+    usernames = cache.get(redis_key)
+    if not usernames:
+        usernames = User.objects.all()
+        cache.set(redis_key, usernames, timeout=60)
     data = {
         'is_taken': usernames.filter(username__iexact=username).exists()
     }

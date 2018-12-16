@@ -106,10 +106,10 @@ formValidation = {
 	submitFormHandler: function(e){
 		this.validateFirstNameHandler();
 		this.validateLastNameHandler();
-		this.validateUsernameHandler();
 		this.validateEmailHandler();
 		this.validatePasswordHandler();
-		if(this.validatedFields.firstName && this.validatedFields.lastName && this.validatedFields.email && this.validatedFields.password && this.validatedFields.username){
+		this.validatePasswordRepeatHandler();
+		if(this.validatedFields.firstName && this.validatedFields.lastName && this.validatedFields.email && this.validatedFields.password && this.validatedFields.passwordRepeat && this.validatedFields.username){
 			this.$submitButton.addClass('loading').html('<span class="loading-spinner"></span>')
 		}else{
 		    e.preventDefault();
@@ -134,33 +134,51 @@ formValidation = {
 		}
 	},
 	validateUsername: function($input){
-		if($input.val() != ''){
-			if(lastUsername[0] !== $input.val()){
+
+		function display(result,content){
+			content = content || '';
+			if(result==false){
 				$input.parent().removeClass('invalid');
 				$input.parent().find('span.label-text small.error').remove();
-				lastUsername[0] = $input.val();
-				var username = $input.val();
-    			$.ajax({url: '/ajax/validate_username/', data: {'username': username}, dataType: 'json',
-    				success: function (data) {
-        				if (data.is_taken) {
-            				$input.parent().addClass('invalid');
-							$input.parent().find('span.label-text').append(' <small class="error"> already exists</small>');
-							lastUsername[1] = false;
-            				return false
-        				}else{
-        					lastUsername[1] = true;
-        					return true
-        				}
+				$input.parent().addClass('invalid');
+				$input.parent().find('span.label-text').append(content);
+			}else{
+				$input.parent().removeClass('invalid');
+				$input.parent().find('span.label-text small.error').remove();
+			}
+		}
+
+		if($input.val().length > 5){
+			if(lastUsername[0] !== $input.val()){
+				var regEx = /^[\w.@+-]+$/;
+					if(regEx.test($input.val())){
+						var username = $input.val();
+    					$.ajax({url: '/ajax/validate_username/', data: {'username': username}, dataType: 'json',
+    						success: function (data) {
+        						if (data.is_taken) {
+        							display(false,' <small class="error"> already exists</small>');
+									lastUsername[1] = false;
+	            					return false
+    	    					}else{
+    	    						display(true);
+        							lastUsername[1] = true;
+        							return true
+        						}
+    						}
+    					});
+    					lastUsername[0] = username;
+    					return lastUsername[1]
+					}else{
+						display(false,' <small class="error"> invalid character</small>');
+						lastUsername[0] = username;
+						return false
     				}
-    			});
-    			
-    			return lastUsername[1]
-			}else{}
+			}else{
+				return lastUsername[1]
+			}
 		}else{
-			$input.parent().removeClass('invalid');
-			$input.parent().find('span.label-text small.error').remove();
-			$input.parent().addClass('invalid');
-			$input.parent().find('span.label-text').append(' <small class="error"> field is empty</small>');
+			lastUsername[0] = $input.val();
+			display(false,' <small class="error"> needs 6+ symbols</small>');
 			return false;
 		}
 	},
@@ -193,7 +211,7 @@ formValidation = {
 	validatePasswordRepeat: function($input){
 		$input.parent().removeClass('invalid');
 		$input.parent().find('span.label-text p').remove();
-		$input.parent().find('span.label-text').append('<p>Password repeat<p>');
+		$input.parent().find('span.label-text').append('<p>Repeat<p>');
 		
 		if ($input.val().length >= 8){
 			if($input.val() === window.password){
