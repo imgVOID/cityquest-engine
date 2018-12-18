@@ -3,6 +3,7 @@ gunicorn==19.9.0
 django-guardian==1.4.9
 django-geojson
 django-leaflet
+django-grappelli
 jsonfield
 Pillow
 six

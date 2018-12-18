@@ -67,6 +67,11 @@
           route.getPlan().setWaypoints([userlatlng,{{center}}]);
           route.route();
         });
+        
+        fetch('{% url "profile" %}?quest=2').then(function(resp){return resp.json();})
+        .then(function(data) {
+          window.profile_data = data;
+        });
 
         var profileButton = L.easyButton('<img class="profileButtonImage" src="{%static 'map/images/user.png'%}">', function(btn, map){
           
@@ -74,10 +79,10 @@
           <br>
           <button id="closeButton">close</button>
           <br>
-          <h3>{{ user.username }} ({{ user.get_full_name }})</h3>
-          <h2>Quest: {% block quest %}{% endblock %}</h2>
-          <h3>LEVEL: {{ level }}
-          {% block progress %}{% endblock %} </h3>
+          <h3>${ profile_data.username } (${ profile_data.full_name })</h3>
+          <h2>Quest: ${profile_data.title}</h2>
+          <h3>LEVEL: ${profile_data.level}
+          (${profile_data.progress[profile_data.quest_id]}%) </h3>
           {% if level == 1%}
           <h3>Hello! You need to buy this quest ;)
           You can do this by click on your first search area and follow instructions.
@@ -86,8 +91,8 @@
           {% endif %}
           <h4>YOUR TOTAL PROGRESS:</h4>
           <ul>
-          <li><a href="{% url 'first'%}">First Quest level</a>: {{ user.profile.first_quest }} ({{ progress1 }}%)</li>
-          <li><a href="{% url 'second'%}">Second Quest level</a>: {{ user.profile.second_quest }} ({{ progress2 }}%)</li>
+          <li><a href="{% url 'first'%}">First Quest</a>: ${profile_data.progress[1]}%</li>
+          <li><a href="{% url 'second'%}">Second Quest</a>: ${profile_data.progress[2]}%</li>
           </ul>
           <a href="{% url 'logout' %}"><button id="logoutButton">Logout</button></a>`;
           

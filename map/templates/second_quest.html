@@ -5,20 +5,18 @@ Second Quest
 {% endblock %}
 
 {% block progress %}
-({{ progress2 }}%)
+({{ progress2 }})
 {% endblock %}
 
 {% block content %}
-{% load cache %}
-{% cache 60000 mapdata_second request.user.username %}
-fetch('{% url "2polygon" %}')
+fetch('{% url "polygon" %}')
     .then(function(resp) {
         return resp.json();
     })
     .then(function(data) {
     var color = "";
     function levelFilter(feature){
-        if (feature.properties.level == {{level}}) return true
+        if ((feature.properties.quest === {{quest}}) && (feature.properties.level === {{level}})){return true}else{return false}
     }
     L.geoJson(data, 
     {
@@ -110,13 +108,13 @@ fetch('{% url "2polygon" %}')
         }).addTo(map);
     });
           
-        fetch('{% url "2marker" %}')
+        fetch('{% url "marker" %}')
           .then(function(resp) {
             return resp.json();
           })
           .then(function(data) {
             function levelFilter(feature){
-                if (feature.properties.level < {{level}}) return true
+              if ((feature.properties.quest === {{quest}}) && (feature.properties.level < {{level}})){return true}else{return false}
             }
             L.geoJson(data,{filter: levelFilter,
               onEachFeature: function onEachFeature(feature, layer) {
@@ -132,5 +130,4 @@ fetch('{% url "2polygon" %}')
               }
             }).addTo(map);
           });
-          {% endcache %}
 {% endblock %}

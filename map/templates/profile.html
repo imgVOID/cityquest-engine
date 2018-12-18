@@ -1,0 +1,17 @@
+<body style="text-align: center" align="center">
+    <h3>{{ user.username }} ({{ user.get_full_name }})</h3>
+          <h2>Quest: {{ quest }}</h2>
+          <h3>LEVEL: {{ level }}</h3>
+          {% if level == 1%}
+          <h3>Hello! You need to buy this quest ;)
+          You can do this by click on your first search area and follow instructions.
+          Good luck!</h3>
+          <p>Tip: to FULLSCREEN the map click on left bottom button after you close this window.</p>
+          {% endif %}
+          <h4>YOUR TOTAL PROGRESS:</h4>
+          <ul>
+          <li><a href="{% url 'first'%}">First Quest level</a>: {{ user.profile.id1 }} ({{ progress1 }})</li>
+          <li><a href="{% url 'second'%}">Second Quest level</a>: {{ user.profile.id2 }} ({{ progress2 }})</li>
+          </ul>
+          <a href="{% url 'logout' %}"><button id="logoutButton">Logout</button></a>`;
+</body>
