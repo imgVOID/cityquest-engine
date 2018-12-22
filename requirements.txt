@@ -8,4 +8,4 @@ jsonfield
 Pillow
 six
 django-redis-cache
-redis
+redis==2.10.6

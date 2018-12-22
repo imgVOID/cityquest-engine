@@ -29,9 +29,4 @@ urlpatterns = [
     url(r'^testreset/(?P<quest>\d+)/$', views.testreset, name='testreset'),
     url(r'^$', views.quest_list, name='quest_list'),
     url(r'^polygon.geojson$', views.polygon, name='polygon'),
-    url(r'^marker.geojson$', views.marker, name='marker'),
-    url(r'^1marker.geojson$', views.marker1, name='1marker'),
-    url(r'^1polygon.geojson$', views.polygon1, name='1polygon'),
-    url(r'^2polygon.geojson$', views.polygon2, name='2polygon'),
-    url(r'^2marker.geojson$', GeoJSONLayerView.as_view(model=SecondQuestMarker, properties=('title', 'description', 'picture_url','icon','level')), name='2marker')
-] #+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    url(r'^marker.geojson$', views.marker, name='marker')] #+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

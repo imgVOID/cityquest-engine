@@ -1,8 +1,9 @@
 from djgeojson.fields import PolygonField, PointField
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save,post_delete
 from django.dispatch import receiver
+from django.core.cache import cache
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -22,7 +23,7 @@ def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
 class Quest(models.Model):
-    
+
     id = models.PositiveIntegerField(primary_key=True)
     title = models.CharField(max_length=256)
     description = models.TextField()
@@ -44,6 +45,10 @@ class Polygon(models.Model):
     @property
     def picture_url(self):
         return self.picture
+@receiver(post_save, sender=Polygon)
+@receiver(post_delete, sender=Polygon)
+def delete_polygons(instance, **kwargs):
+    cache.delete('polygons')
 
 class Marker(models.Model):
     quest = models.ForeignKey(Quest, on_delete=models.CASCADE)
@@ -59,7 +64,10 @@ class Marker(models.Model):
     @property
     def picture_url(self):
         return self.picture
-
+@receiver(post_save, sender=Marker)
+@receiver(post_delete, sender=Marker)
+def delete_markers(instance, **kwargs):
+    cache.delete('markers')
 
 class FirstQuestPolygon(models.Model):
 

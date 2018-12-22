@@ -15,27 +15,27 @@
     <link rel="stylesheet" href="{% static "css/style.css" %}" />
 {% endcache %}
     <script type="text/javascript">
-      
+
         var LeafIcon = L.Icon.extend({
             options: {
             shadowUrl: '',
             iconSize:     [40, 40],
             shadowSize:   [50, 64],
-            iconAnchor:   [10, 10],
+            iconAnchor:   [20, 0],
             shadowAnchor: [4, 62],
             popupAnchor:  [0, 0]
         }
         });
-      
-      
+
+
       window.addEventListener("map:init", function (event) {
         var map = event.detail.map;
         map.addControl(new L.Control.Fullscreen({ position: 'bottomleft' }));
-        
+
         var userlatlng = 0;
-        
+
         function onLocationFound(e) {
-          
+
             var radius = e.accuracy/2;
             userlatlng = e.latlng;
             current_accuracy = L.circle(e.latlng, radius);
@@ -50,31 +50,33 @@
 
         map.on('locationfound', onLocationFound);
         map.on('locationerror', onLocationError);
-        
+
         function locateUser(){
           map.removeLayer(current_position);
           map.removeLayer(current_accuracy);
           map.locate({setView: true, maxZoom: 15});
         }
-        
+
         map.locate({setView: false});
-        
+
         window.userPlace = userlatlng.toString().slice(7,-1).split(', ');
-        
+
         var toLocate = L.easyButton('<img class="locate" src="{%static 'map/images/locate.png'%}">', function(btn, map){
           locateUser();
-          
+
           route.getPlan().setWaypoints([userlatlng,{{center}}]);
           route.route();
         });
-        
-        fetch('{% url "profile" %}?quest=2').then(function(resp){return resp.json();})
+
+        fetch('{% url "profile" %}?quest={{quest}}').then(function(resp){return resp.json();})
         .then(function(data) {
           window.profile_data = data;
+          {% if level == 1 %}
+          document.getElementById('profileButton').click();
+          {% endif %}
         });
 
         var profileButton = L.easyButton('<img class="profileButtonImage" src="{%static 'map/images/user.png'%}">', function(btn, map){
-          
           var content = `
           <br>
           <button id="closeButton">close</button>
@@ -82,7 +84,7 @@
           <h3>${ profile_data.username } (${ profile_data.full_name })</h3>
           <h2>Quest: ${profile_data.title}</h2>
           <h3>LEVEL: ${profile_data.level}
-          (${profile_data.progress[profile_data.quest_id]}%) </h3>
+          (${profile_data.progress[profile_data.quest_id].progress}%) </h3>
           {% if level == 1%}
           <h3>Hello! You need to buy this quest ;)
           You can do this by click on your first search area and follow instructions.
@@ -91,70 +93,68 @@
           {% endif %}
           <h4>YOUR TOTAL PROGRESS:</h4>
           <ul>
-          <li><a href="{% url 'first'%}">First Quest</a>: ${profile_data.progress[1]}%</li>
-          <li><a href="{% url 'second'%}">Second Quest</a>: ${profile_data.progress[2]}%</li>
+          {% for i in all_quests %}
+          <li><a href="{% url i %}">${profile_data.progress[{{i}}].title}</a>: ${profile_data.progress[{{i}}].progress}%</li>
+          {% endfor %}
           </ul>
           <a href="{% url 'logout' %}"><button id="logoutButton">Logout</button></a>`;
-          
-          
+
+
           sidebar.show();
           sidebar.setContent(content);
           document.getElementById("closeButton").onclick = hideSidebar
         },{ id: 'profileButton', position: 'bottomright' });
-        
+
         map.addControl(profileButton);
-        
+
         var buttons = [];
         buttons.push(toLocate);
-        
+
         var sidebar = L.control.sidebar('sidebar', {
           closebutton: true,
           position: 'right'
         });
-        
+
         map.addControl(sidebar);
-        
+
         function hideSidebar(){
           sidebar.hide();
         }
-        
-        {% if level == 1 %}
-        document.getElementById('profileButton').click();
-        {% endif %}
-        
+
+
+
+
         {% block content %}
         {% endblock %}
-        
+
         toPolygon = L.easyButton(
-          '<img class="locate" src="{% static 'map/images/toquest.png' %}">', 
+          '<img class="locate" src="{% static 'map/images/toquest.png' %}">',
           function(btn, map){
             map.flyTo({{center}});
           },
           { id: 'toPolygonButton' });
-          
+
         buttons.push(toPolygon);
         L.easyBar(buttons).addTo(map);
-          
+
       });
-      
-     
     </script>
-    
+
   </head>
   <body>
-    
+
     {% leaflet_map "main" settings_overrides=override %}
-    
-    
-    <div class="user" id="users">{{ user.get_username }} {{level}} 
-    <a href="{% url 'levelUp' quest=quest %}">ToLevel2</a> 
+
+
+    <div class="user" id="users">{{ user.get_username }} {{level}}
+    <a href="{% url 'levelUp' quest=quest %}">ToLevel2</a>
     <a href="{% url 'testreset' quest=quest %}">Restart</a>
     </div>
 
-    
+
   <div id="sidebar">
     <h1></h1>
   </div>
-    
+
   </body>
 </html>

@@ -1,123 +1,114 @@
 {% extends "base.html" %}
 
-{% block quest %}
-First Quest
-{% endblock %}
-
-{% block progress %}
-({{ progress1 }})
-{% endblock %}
-
 {% block content %}
 {% load cache %}
-{% cache 60000 mapdata_first request.user.username %}
-        fetch('{% url "1polygon" %}')
-          .then(function(resp) {
-            return resp.json();
-          })
-          .then(function(data) {
-            var color = "";
-            function levelFilter(feature){
-                if (feature.properties.level == {{level}}) return true
-            }
-            L.geoJson(data, 
-            {
-              filter: levelFilter,
-              onEachFeature: function onEachFeature(feature, layer) {
-                var content = `
-                <button id="closeButton">close</button>
-                <br><br><img width="100" height="50" src="${feature.properties.picture}"/>
-                <h3 id="title">${feature.properties.title}</h3>
-                <p>${feature.properties.description}</p>
-                <br>
-                <button id="walkingButton">Walking directions</button>
-                <button id="drivingButton">Driving directions</button>
-                <button id="cyclingButton">Cycling directions</button>
-                <button id="hideRouterButton">Hide directions</button>
-                <button id="directionsButton">Google Maps directions</button>
-                <br>
-                <ul id = "directionsList">`;
-                
-                function sidebarButtons(){
-                  document.getElementById('closeButton').onclick = hideSidebar;
-                  document.getElementById('directionsButton').onclick = directionsButton;
-                  document.getElementById('hideRouterButton').onclick = function(){
-                    sidebar.hide();
-                    route.getRouter().options.profile = 'mapbox/';
-                    route.route();
-                  };
-                  {% for type in routeTypes %}
-                  document.getElementById('{{ type }}Button').onclick = function(){
-                    sidebar.hide();
-                    route.getRouter().options.profile = 'mapbox/{{ type }}';
-                    route.route();
-                  }
-                  {% endfor %}
-                }
-                
-                window.route = L.Routing.control({
-                    waypoints: [userlatlng,{{center}}],
-                    fitSelectedRoutes: false,
-                    createMarker: function() { return null; },
-                    router: L.Routing.mapbox('pk.eyJ1IjoiaW1ndm9pZCIsImEiOiJjam9rb2pjdTUwYzNoM3Zub3RqajNjd21qIn0.p3FJ-deF-vck6YdoScgFIA',{ profile: false }),
-                    routeLine: function(route) {
-                      var line = L.Routing.line(route, {
-                        addWaypoints: false,
-                        extendToWaypoints: false,
-                        routeWhileDragging: false,
-                        autoRoute: true,
-                        useZoomParameter: false,
-                        draggableWaypoints: false,
-                        fitSelectedRoutes: false
-                      });
-                      line.eachLayer(function(l) {
-                        l.on('click', function(e) {
-                          sidebar.show();
-                          sidebar.setContent(content);
-                          sidebarButtons();
-                        });
-                      });
-                      return line;
-                      
-                    }
-                  });
-                  window.route.addTo(map);
-                  
-                var directionsButton = function(){
-                  userPlace = userlatlng.toString().slice(7,-1).split(', ');
-                  var center = {{center}};
-                  directions = `https://www.google.com/maps/dir/?api=1&origin=${center[0]},${center[1]}&destination=${userPlace[0]},${userPlace[1]}&travelmode=`
-                  contentDirections = `
-                  <li><a class = "directionsLink" href="${directions}walking" target="_blank">Walking</a></li>
-                  <li><a class = "directionsLink" href="${directions}driving" target="_blank">Driving</a></li>
-                  <li><a class = "directionsLink" href="${directions}transit" target="_blank">City Transport</a></li>`
-                  document.getElementById("directionsList").innerHTML=contentDirections;
-                  //map.removeControl(routes);
-                }
-                
-                
-                layer.on('click', function(){
-                  sidebar.show();
-                  sidebar.setContent(content);
-                  sidebarButtons();
-                });
-                
-                
-                color = feature.properties.color;
-              },
-              style: function(feature) {
-              return {"color":feature.properties.color}
+{% cache 60000 mapdata_1 request.user.username %}
+fetch('{% url "polygon" %}')
+    .then(function(resp) {
+        return resp.json();
+    })
+    .then(function(data) {
+    var color = "";
+    function levelFilter(feature){
+        if ((feature.properties.quest === {{quest}}) && (feature.properties.level === {{level}})){return true}else{return false}
+    }
+    L.geoJson(data,
+    {
+        filter: levelFilter,
+        onEachFeature: function onEachFeature(feature, layer) {
+        var content = `
+            <button id="closeButton">close</button>
+            <br><br><img width="100" height="50" src="${feature.properties.picture}"/>
+            <h3 id="title">${feature.properties.title}</h3>
+            <p>${feature.properties.description}</p>
+            <br>
+            <button id="walkingButton">Walking directions</button>
+            <button id="drivingButton">Driving directions</button>
+            <button id="cyclingButton">Cycling directions</button>
+            <button id="hideRouterButton">Hide directions</button>
+            <button id="directionsButton">Google Maps directions</button>
+            <br>
+            <ul id = "directionsList">`;
+
+            function sidebarButtons(){
+              document.getElementById('closeButton').onclick = hideSidebar;
+              document.getElementById('directionsButton').onclick = directionsButton;
+              document.getElementById('hideRouterButton').onclick = function(){
+                sidebar.hide();
+                route.getRouter().options.profile = 'mapbox/';
+                route.route();
+              };
+              {% for type in routeTypes %}
+              document.getElementById('{{ type }}Button').onclick = function(){
+                sidebar.hide();
+                route.getRouter().options.profile = 'mapbox/{{ type }}';
+                route.route();
               }
-            }).addTo(map);
-          });
-          
-        fetch('{% url "1marker" %}')
+              {% endfor %}
+            }
+
+            window.route = L.Routing.control({
+                waypoints: [userlatlng,{{center}}],
+                fitSelectedRoutes: false,
+                createMarker: function() { return null; },
+                router: L.Routing.mapbox('pk.eyJ1IjoiaW1ndm9pZCIsImEiOiJjam9rb2pjdTUwYzNoM3Zub3RqajNjd21qIn0.p3FJ-deF-vck6YdoScgFIA',{ profile: false }),
+                routeLine: function(route) {
+                  var line = L.Routing.line(route, {
+                    addWaypoints: false,
+                    extendToWaypoints: false,
+                    routeWhileDragging: false,
+                    autoRoute: true,
+                    useZoomParameter: false,
+                    draggableWaypoints: false,
+                    fitSelectedRoutes: false
+                  });
+                  line.eachLayer(function(l) {
+                    l.on('click', function(e) {
+                      sidebar.show();
+                      sidebar.setContent(content);
+                      sidebarButtons();
+                    });
+                  });
+                  return line;
+
+                }
+              });
+              window.route.addTo(map);
+
+            var directionsButton = function(){
+              userPlace = userlatlng.toString().slice(7,-1).split(', ');
+              var center = {{center}};
+              directions = `https://www.google.com/maps/dir/?api=1&origin=${center[0]},${center[1]}&destination=${userPlace[0]},${userPlace[1]}&travelmode=`
+              contentDirections = `
+              <li><a class = "directionsLink" href="${directions}walking" target="_blank">Walking</a></li>
+              <li><a class = "directionsLink" href="${directions}driving" target="_blank">Driving</a></li>
+              <li><a class = "directionsLink" href="${directions}transit" target="_blank">City Transport</a></li>`
+              document.getElementById("directionsList").innerHTML=contentDirections;
+            }
+
+
+            layer.on('click', function(){
+              sidebar.show();
+              sidebar.setContent(content);
+              sidebarButtons();
+            });
+
+
+            color = feature.properties.color;
+            },
+            style: function(feature) {
+                return {"color":feature.properties.color}
+            }
+        }).addTo(map);
+    });
+
+        fetch('{% url "marker" %}')
           .then(function(resp) {
             return resp.json();
           })
           .then(function(data) {
             function levelFilter(feature){
-                if (feature.properties.level < {{level}}) return true
+              if ((feature.properties.quest === {{quest}}) && (feature.properties.level < {{level}})){return true}else{return false}
             }
             L.geoJson(data,{filter: levelFilter,
               onEachFeature: function onEachFeature(feature, layer) {
@@ -133,5 +124,5 @@ First Quest
               }
             }).addTo(map);
           });
-          {% endcache %}
+{% endcache %}
 {% endblock %}
