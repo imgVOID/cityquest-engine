@@ -1,14 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% load cache %}
-{% cache 60000 mapdata_1 request.user.username %}
-fetch('{% url "polygon" %}')
-    .then(function(resp) {
-        return resp.json();
-    })
-    .then(function(data) {
-    var color = "";
+
+function contentPolygons(data){
+var color = "";
     function levelFilter(feature){
         if ((feature.properties.quest === {{quest}}) && (feature.properties.level === {{level}})){return true}else{return false}
     }
@@ -35,18 +30,26 @@ fetch('{% url "polygon" %}')
               document.getElementById('directionsButton').onclick = directionsButton;
               document.getElementById('hideRouterButton').onclick = function(){
                 sidebar.hide();
-                route.getRouter().options.profile = 'mapbox/';
-                route.route();
+                map.removeControl(route);
+                count = 0;
               };
               {% for type in routeTypes %}
               document.getElementById('{{ type }}Button').onclick = function(){
                 sidebar.hide();
+
                 route.getRouter().options.profile = 'mapbox/{{ type }}';
-                route.route();
+                if (count < 1){
+                  window.route.addTo(map);
+                  count += 1;
+                }else{
+                  route.route();
+                }
               }
               {% endfor %}
             }
 
+
+            window.count = 0;
             window.route = L.Routing.control({
                 waypoints: [userlatlng,{{center}}],
                 fitSelectedRoutes: false,
@@ -73,7 +76,6 @@ fetch('{% url "polygon" %}')
 
                 }
               });
-              window.route.addTo(map);
 
             var directionsButton = function(){
               userPlace = userlatlng.toString().slice(7,-1).split(', ');
@@ -100,14 +102,10 @@ fetch('{% url "polygon" %}')
                 return {"color":feature.properties.color}
             }
         }).addTo(map);
-    });
+}
 
-        fetch('{% url "marker" %}')
-          .then(function(resp) {
-            return resp.json();
-          })
-          .then(function(data) {
-            function levelFilter(feature){
+function contentMarkers(data){
+  function levelFilter(feature){
               if ((feature.properties.quest === {{quest}}) && (feature.properties.level < {{level}})){return true}else{return false}
             }
             L.geoJson(data,{filter: levelFilter,
@@ -123,6 +121,9 @@ fetch('{% url "polygon" %}')
                 return L.marker(latlng, { icon: new LeafIcon({iconUrl: feature.properties.icon})});
               }
             }).addTo(map);
-          });
-{% endcache %}
-{% endblock %}
+}
+
+contentMarkers({% autoescape off %}{{marker}}{% endautoescape %});
+contentPolygons({% autoescape off %}{{polygon}}{% endautoescape %});
+
+{% endblock%}

@@ -13,110 +13,115 @@
     <link rel="stylesheet" href="{% static "css/style.css" %}" />
 {% endcache %}
     <script type="text/javascript">
-      
+    {% if progress == 0 %}
+      fetch('{% url "profile" %}?quest=1').then(function(resp){return resp.json();})
+        .then(function(data) {
+          window.progress = data.progress;
+        });
       window.addEventListener("map:init", function mapmake(event) {
+    {% else %}
+      window.addEventListener("map:init", function mapmake(event) {
+        window.progress = {% autoescape off %}{{progress}}{% endautoescape %};
+    {% endif %}
         var map = event.detail.map;
+
         map.addControl(new L.Control.Fullscreen({ position: 'bottomleft' }));
-        
+
         var profileButton = L.easyButton('<img class="profileButtonImage" src="{%static 'map/images/user.png'%}">', function(btn, map){
-          
+
           var content = `
           <br>
           <button id="closeButton">Close</button>
           <br>
           <h3>{{ user.username }} ({{ user.get_full_name }})</h3>
-          
+
           <h4>YOUR TOTAL PROGRESS:</h4>
           <ul>
-          <li><a href="{% url '1'%}">First Quest level</a>: {{ user.profile.id1 }} ({{ progress1 }}%)</li>
-          <li><a href="{% url '2'%}">Second Quest level</a>: {{ user.profile.id2 }} ({{ progress2 }}%)</li>
+          {% for i in all_quests %}
+          <li><a href="{% url i %}">${progress[{{i}}].title}</a>: ${progress[{{i}}].progress}% ${progress[{{i}}].status[1]}</li>
+          {% endfor %}
           </ul>
           <a href="{% url 'logout' %}"><button id="logoutButton">Logout</button></a>`;
-          
-          
+
+
           sidebar.show();
           sidebar.setContent(content);
           document.getElementById("closeButton").onclick = hideSidebar;
-          
+
         },{ id: 'profileButton', position: 'bottomright' });
-        
+
         map.addControl(profileButton);
-        
+
         var sidebar = L.control.sidebar('sidebar', {
           closebutton: true,
           position: 'right'
         });
-        
+
         map.addControl(sidebar);
-        
+
         function hideSidebar(){
           sidebar.hide();
         }
-        
+
         function getPoints(data){
             var features = data.features;
-            window.linePoints = [[],[]];
-            window.levels = [0,0];
-            for (i = 0; i < features.length; i += 1) {
-                if(features[i].properties.quest === 1){
-                  linePoints[0].push(features[i].geometry.coordinates);
-                  levels[0] += 1;
-                } else if (features[i].properties.quest === 2){
-                  linePoints[1].push(features[i].geometry.coordinates);
-                  levels[1] += 1;
-                } else {return false}
+            window.linePoints = [false];
+            window.levels = [false];
+            for (i = 1; i <= progress.length; i++){
+              linePoints.push([]);
+              levels.push(0);
             }
-        }
-        
+            for (i = 0; i < features.length; i++) {
+              for (j = 1; j <= levels.length; j++){
+                if(features[i].properties.quest === j){
+                  linePoints[j].push(features[i].geometry.coordinates);
+                  levels[j] += 1;
+                } else {}
+            }}}
+
         // Download GeoJSON data with Ajax
         fetch('{% url "marker" %}')
           .then(function(resp) {
             return resp.json();
           })
           .then(function(data) {
-          
+
             getPoints(data);
-            L.geoJSON({"type": "LineString","coordinates": linePoints[0]}, 
-                {style: {"color": "red", "weight": 15, "opacity": 0.65}, 
+            {% autoescape off %}
+            var descs = {{descs}}
+            var colors = {{colors}}
+            {% endautoescape %}
+            for(i=1;i<=linePoints.length;i++){
+            L.geoJSON({"type": "LineString","coordinates": linePoints[i]},
+                {style: {"color": colors[i], "weight": 15, "opacity": 0.65},
                 onEachFeature: function onEachFeature(feature, layer) {
-                    var content = `<button id="closeButton">close</button><br><br><h1>FIRST QUEST</h1><h4>TOTAL LEVELS: ${levels[0]}</h4><p>First quest description</p><h3>YOUR PROGRESS: {{ progress1 }}%</h3><a href="{% url '1' %}"><button>Go to First Quest</button></a>`;
+                    var content = `<button id="closeButton">close</button><br><br><h1>${progress[i].title}</h1><h4>TOTAL LEVELS: ${levels[i]}</h4><p>${descs[i]}</p><h3>YOUR PROGRESS: ${progress[i].progress}%</h3><a href="{% url 'quest_list' %}${i}/"><button>Go to ${progress[i].title}</button></a>`;
                     layer.on('click', function(){
                         sidebar.show();
                         sidebar.setContent(content);
                         document.getElementById("closeButton").onclick = hideSidebar;
                     });
                 }
-            }).addTo(map);
-            L.geoJSON({"type": "LineString","coordinates": linePoints[1]}, 
-                {style: {"color": "blue", "weight": 15, "opacity": 0.65}, 
-                onEachFeature: function onEachFeature(feature, layer) {
-                    var content = `<button id="closeButton">close</button><br><br><h1>SECOND QUEST</h1><h4>TOTAL LEVELS: ${levels[1]}</h4><p>Second quest description</p><h3>YOUR PROGRESS: {{ progress2 }}%</h3><a href="{% url '2' %}"><button>Go to Second Quest</button></a>`;
-                    layer.on('click', function(){
-                        sidebar.show();
-                        sidebar.setContent(content);
-                        document.getElementById("closeButton").onclick = hideSidebar;
-                    });
-                }
-            }).addTo(map);
-            
+            }).addTo(map);}
+
           });
-          
-        
-          
-          
+
+
+
+
       });
-      
-     
+
+
     </script>
-    
+
   </head>
   <body>
-    
+
     {% leaflet_map "main" settings_overrides=override %}
-    
+
   <div id="sidebar">
     <h1></h1>
   </div>
-    
+
   </body>
 </html>

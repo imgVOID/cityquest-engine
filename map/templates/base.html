@@ -94,7 +94,7 @@
           <h4>YOUR TOTAL PROGRESS:</h4>
           <ul>
           {% for i in all_quests %}
-          <li><a href="{% url i %}">${profile_data.progress[{{i}}].title}</a>: ${profile_data.progress[{{i}}].progress}%</li>
+          <li><a href="{% url i %}">${profile_data.progress[{{i}}].title}</a>: ${profile_data.progress[{{i}}].progress}% ${profile_data.progress[{{i}}].status[1]}</li>
           {% endfor %}
           </ul>
           <a href="{% url 'logout' %}"><button id="logoutButton">Logout</button></a>`;
@@ -121,9 +121,6 @@
           sidebar.hide();
         }
 
-
-
-
         {% block content %}
         {% endblock %}
 
@@ -147,7 +144,8 @@
 
 
     <div class="user" id="users">{{ user.get_username }} {{level}}
-    <a href="{% url 'levelUp' quest=quest %}">ToLevel2</a>
+    <a href="{% url 'levelUp' quest=quest %}">LevelUp</a>
+    <a href="{% url 'clear_cache' quest=quest %}">Refresh page</a>
     <a href="{% url 'testreset' quest=quest %}">Restart</a>
     </div>
 
