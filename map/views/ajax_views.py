@@ -21,27 +21,40 @@ def profile(request):
         desc = quest.description
         level_field_str = 'id'+quest_id
         level = getattr(user.profile, level_field_str)
+        total_levels = Polygon.objects.filter(quest=quest_id).count()
+        level_field_str = 'id' + str(quest_id)
+        if user.groups.filter(name=quest_id):
+            this_progress = "{}%".format(int(float(getattr(user.profile, level_field_str))/float(total_levels)*100.0))
+        else:
+            this_progress = ""
 
     redis_key = 'progress_{}'.format(user.username)
     progress = cache.get(redis_key)
     if not progress:
         percents = []
         quests_status = []
+        this_id = []
+        prices = list(Quest.objects.values_list("price", flat=True))
         for i in range(1, Quest.objects.all().count()+1):
+            this_id.append(i)
             level_field_str = 'id' + str(i)
             if user.groups.filter(name=i):
-                percents.append(int(float(getattr(user.profile, level_field_str))/float(Polygon.objects.filter(quest=i).count())*100.0))
-                quests_status.append([1,''])
+                perc = "{}%".format(int(float(getattr(user.profile, level_field_str))/float(Polygon.objects.filter(quest=i).count())*100.0))
+                percents.append(perc)
+                quests_status.append([0,'','green'])
             else:
-                percents.append(0)
-                quests_status.append([0,'BUY!'])
+                percents.append('')
+                quests_status.append([1,"{}$".format(prices[i-1]),'red'])
         titles = list(Quest.objects.values_list("title", flat=True))
-        progress = [0] + [{'title':titles[i], 'progress':percents[i], 'status':quests_status[i]} for i in range(0,len(titles))]
+        progress = [{'title':titles[i], 'progress':percents[i], 'status':quests_status[i], 'this_id':this_id[i]} for i in range(0,len(titles))]
+        progress = [0] + sorted(progress, key=lambda k: k['status'][0])
         cache.set(redis_key, progress, timeout=60000)
     data = {
         'quest_id':int(quest_id),
         'title':title,
         'level':level,
+        'this_progress':this_progress,
+        'total_levels':total_levels,
         'progress':progress,
         'username':user.username,
         'full_name': '{} {}'.format(user.first_name, user.last_name),

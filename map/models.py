@@ -25,6 +25,7 @@ def save_user_profile(sender, instance, **kwargs):
 class Quest(models.Model):
     id = models.PositiveIntegerField(primary_key=True)
     title = models.CharField(max_length=256)
+    price = models.IntegerField(default=0)
     description = models.TextField()
     def __str__(self):
         return self.title

@@ -25,25 +25,31 @@
     {% endif %}
         var map = event.detail.map;
 
+
         map.addControl(new L.Control.Fullscreen({ position: 'bottomleft' }));
 
         var profileButton = L.easyButton('<img class="profileButtonImage" src="{%static 'map/images/user.png'%}">', function(btn, map){
+
+          var links = ''
+          for(i=1;i<={{ quests_count }};i++){
+            links += `<li class='${progress[i].status[2]}'>
+          <a href="{% url 'quest_list' %}${progress[i].this_id}/">${progress[i].title}</a>:
+          ${progress[i].progress}
+          ${progress[i].status[1]}</li>`
+          }
+          links += '</ul>'
 
           var content = `
           <br>
           <button id="closeButton">Close</button>
           <br>
           <h3>{{ user.username }} ({{ user.get_full_name }})</h3>
-
-          <h4>YOUR TOTAL PROGRESS:</h4>
           <ul>
-          {% for i in all_quests %}
-          <li><a href="{% url i %}">${progress[{{i}}].title}</a>: ${progress[{{i}}].progress}% ${progress[{{i}}].status[1]}</li>
-          {% endfor %}
-          </ul>
-          <a href="{% url 'logout' %}"><button id="logoutButton">Logout</button></a>`;
+          <h4>YOUR TOTAL PROGRESS:</h4>
+          `;
 
-
+          content += links;
+          content += `<a href="{% url 'logout' %}"><button id="logoutButton">Logout</button></a>`;
           sidebar.show();
           sidebar.setContent(content);
           document.getElementById("closeButton").onclick = hideSidebar;
@@ -65,8 +71,8 @@
 
         function getPoints(data){
             var features = data.features;
-            window.linePoints = [false];
-            window.levels = [false];
+            window.linePoints = [[]];
+            window.levels = [[]];
             for (i = 1; i <= progress.length; i++){
               linePoints.push([]);
               levels.push(0);
@@ -95,12 +101,18 @@
             L.geoJSON({"type": "LineString","coordinates": linePoints[i]},
                 {style: {"color": colors[i], "weight": 15, "opacity": 0.65},
                 onEachFeature: function onEachFeature(feature, layer) {
-                    var content = `<button id="closeButton">close</button><br><br><h1>${progress[i].title}</h1><h4>TOTAL LEVELS: ${levels[i]}</h4><p>${descs[i]}</p><h3>YOUR PROGRESS: ${progress[i].progress}%</h3><a href="{% url 'quest_list' %}${i}/"><button>Go to ${progress[i].title}</button></a>`;
+                  if(progress[i] != undefined){
+                    var content = `<button id="closeButton">close</button><br><br>
+                    <h1>${progress[i].title}</h1><h4>TOTAL LEVELS: ${levels[i]}</h4>
+                    <p>${descs[i]}</p><h3>YOUR PROGRESS: ${progress[i].progress}
+                    ${progress[i].status[1]}</h3><a href="{% url 'quest_list' %}${i}/">
+                    <button>Go to ${progress[i].title}</button></a>`;
                     layer.on('click', function(){
                         sidebar.show();
                         sidebar.setContent(content);
                         document.getElementById("closeButton").onclick = hideSidebar;
                     });
+                  }
                 }
             }).addTo(map);}
 

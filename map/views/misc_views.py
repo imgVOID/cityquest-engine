@@ -14,11 +14,6 @@ def quest_list(request):
     if not all_quests:
         all_quests = [str(i) for i in range(1,Quest.objects.all().count()+1)]
         cache.set(redis_key, all_quests, timeout=None)
-    redis_key = 'all_quests'
-    all_quests = cache.get(redis_key)
-    if not all_quests:
-        all_quests = [str(i) for i in range(1,Quest.objects.all().count()+1)]
-        cache.set(redis_key, all_quests, timeout=None)
 
     redis_key = 'quests_descs'
     quests_descs = cache.get(redis_key)
@@ -30,7 +25,10 @@ def quest_list(request):
     progress = cache.get(redis_key)
     if not progress:
         progress = 0
-    return render(request, 'quest_list.html', {'override':override,'descs':quests_descs, 'range':range(1,len(quests_descs)),'colors':colors,'progress':progress,'all_quests':all_quests})
+
+    quests_count = len(quests_descs)-1
+
+    return render(request, 'quest_list.html', {'override':override,'descs':quests_descs, 'quests_count':quests_count,'colors':colors,'progress':progress,'all_quests':all_quests})
 
 @login_required(login_url='/login/')
 def levelUp(request, quest):

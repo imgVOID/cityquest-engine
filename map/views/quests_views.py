@@ -6,11 +6,17 @@ from .ajax_views import json_polygons, json_markers
 
 from django.core.cache import cache
 
+import json
+
+#       ________________________________________________________________
+#       ****************************************************************
+#       ***************************FIRST QUEST**************************
+#       ****************************************************************
+
 @login_required(login_url='/login/')
 def first(request):
     quest = 1
     user = request.user
-    route_type = ['walking','cycling','driving']
     level = None
 
     if user.is_authenticated and user.groups.filter(name=quest):
@@ -40,28 +46,41 @@ def first(request):
 
     override = {'DEFAULT_CENTER': center}
 
-    redis_key = 'polygons'
-    polygon = cache.get(redis_key)
-    if not polygon:
-        polygon = json_polygons()
-        cache.set(redis_key, polygon, timeout=None)
+    redis_key = 'polygon_{}_{}'.format(quest,level)
+    level_polygon = cache.get(redis_key)
+    if not level_polygon:
+        polygon = cache.get('polygons')
+        if not polygon:
+            polygon = json.loads(json_polygons())
+            cache.set('polygons', polygon, timeout=None)
+        level_polygon = polygon
+        level_polygon['features'] = list(filter(lambda x: x['properties']['quest'] == quest and x['properties']['level'] == level, polygon['features']))
+        cache.set(redis_key, level_polygon, timeout=None)
 
-    redis_key = 'markers'
-    marker = cache.get(redis_key)
-    if not marker:
-        marker = json_markers()
-        cache.set(redis_key, marker, timeout=None)
+    redis_key = 'marker_{}_{}'.format(quest,level)
+    level_marker = cache.get(redis_key)
+    if not level_marker:
+        marker = cache.get('markers')
+        if not marker:
+            marker = json.loads(json_markers())
+            cache.set(redis_key, marker, timeout=None)
+        level_marker = marker
+        level_marker['features'] = list(filter(lambda x: x['properties']['quest'] == quest and x['properties']['level'] < level, marker['features']))
+        cache.set(redis_key, level_marker, timeout=None)
 
     return render(request, 'first_quest.html', {
-        'level':level, 'quest':quest, 'routeTypes':route_type, 'override':override,
-        'center':center, 'all_quests':all_quests, 'polygon':polygon,'marker':marker})
+        'level':level, 'quest':quest, 'override':override, 'center':center, 'quests_count':len(all_quests),
+        'polygon':level_polygon,'marker':level_marker,'all_quests':all_quests})
 
+#       ________________________________________________________________
+#       ****************************************************************
+#       ***************************SECOND QUEST**************************
+#       ****************************************************************
 
 @login_required(login_url='/login/')
 def second(request):
     quest = 2
     user = request.user
-    route_type = ['walking','cycling','driving']
     level = None
 
     if user.is_authenticated and user.groups.filter(name=quest):
@@ -91,19 +110,28 @@ def second(request):
 
     override = {'DEFAULT_CENTER': center}
 
-    redis_key = 'polygons'
-    polygon = cache.get(redis_key)
-    if not polygon:
-        polygon = json_polygons()
-        cache.set(redis_key, polygon, timeout=None)
+    redis_key = 'polygon_{}_{}'.format(quest,level)
+    level_polygon = cache.get(redis_key)
+    if not level_polygon:
+        polygon = cache.get('polygons')
+        if not polygon:
+            polygon = json.loads(json_polygons())
+            cache.set('polygons', polygon, timeout=None)
+        level_polygon = polygon
+        level_polygon['features'] = list(filter(lambda x: x['properties']['quest'] == quest and x['properties']['level'] == level, polygon['features']))
+        cache.set(redis_key, level_polygon, timeout=None)
 
-    redis_key = 'markers'
-    marker = cache.get(redis_key)
-    if not marker:
-        marker = json_markers()
-        cache.set(redis_key, marker, timeout=None)
+    redis_key = 'marker_{}_{}'.format(quest,level)
+    level_marker = cache.get(redis_key)
+    if not level_marker:
+        marker = cache.get('markers')
+        if not marker:
+            marker = json.loads(json_markers())
+            cache.set(redis_key, marker, timeout=None)
+        level_marker = marker
+        level_marker['features'] = list(filter(lambda x: x['properties']['quest'] == quest and x['properties']['level'] < level, marker['features']))
+        cache.set(redis_key, level_marker, timeout=None)
 
     return render(request, 'second_quest.html', {
-        'level':level, 'quest':quest, 'routeTypes':route_type, 'override':override,
-        'center':center, 'all_quests':all_quests, 'polygon':polygon,'marker':marker})
-
+        'level':level, 'quest':quest, 'override':override, 'center':center, 'quests_count':len(all_quests),
+        'polygon':level_polygon,'marker':level_marker,'all_quests':all_quests})
