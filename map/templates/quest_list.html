@@ -31,7 +31,7 @@
         var profileButton = L.easyButton('<img class="profileButtonImage" src="{%static 'map/images/user.png'%}">', function(btn, map){
 
           var links = ''
-          for(i=1;i<={{ quests_count }};i++){
+          for(i=1;i<progress.length;i++){
             links += `<li class='${progress[i].status[2]}'>
           <a href="{% url 'quest_list' %}${progress[i].this_id}/">${progress[i].title}</a>:
           ${progress[i].progress}
@@ -94,7 +94,6 @@
 
             getPoints(data);
             {% autoescape off %}
-            var descs = {{descs}}
             var colors = {{colors}}
             {% endautoescape %}
             for(i=1;i<linePoints.length;i++){

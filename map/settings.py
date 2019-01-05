@@ -36,6 +36,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 INSTALLED_APPS = [
     'grappelli',
+    'django.contrib.gis',
     'django.contrib.admin',
     "compressor",
     'django.contrib.auth',

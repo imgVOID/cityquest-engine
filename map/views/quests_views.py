@@ -51,10 +51,10 @@ def first(request):
     if not level_polygon:
         polygon = cache.get('polygons')
         if not polygon:
-            polygon = json.loads(json_polygons())
+            polygon = json_polygons()
             cache.set('polygons', polygon, timeout=None)
-        level_polygon = polygon
-        level_polygon['features'] = list(filter(lambda x: x['properties']['quest'] == quest and x['properties']['level'] == level, polygon['features']))
+        level_polygon = json.loads(polygon)
+        level_polygon['features'] = list(filter(lambda x: x['properties']['quest'] == quest and x['properties']['level'] == level, level_polygon['features']))
         cache.set(redis_key, level_polygon, timeout=None)
 
     redis_key = 'marker_{}_{}'.format(quest,level)
@@ -62,19 +62,19 @@ def first(request):
     if not level_marker:
         marker = cache.get('markers')
         if not marker:
-            marker = json.loads(json_markers())
-            cache.set(redis_key, marker, timeout=None)
-        level_marker = marker
-        level_marker['features'] = list(filter(lambda x: x['properties']['quest'] == quest and x['properties']['level'] < level, marker['features']))
+            marker = json_markers()
+            cache.set('markers', marker, timeout=None)
+        level_marker = json.loads(marker)
+        level_marker['features'] = list(filter(lambda x: x['properties']['quest'] == quest and x['properties']['level'] < level, level_marker['features']))
         cache.set(redis_key, level_marker, timeout=None)
 
-    return render(request, 'first_quest.html', {
+    return render(request, 'second_quest.html', {
         'level':level, 'quest':quest, 'override':override, 'center':center, 'quests_count':len(all_quests),
-        'polygon':level_polygon,'marker':level_marker,'all_quests':all_quests})
+        'polygon':level_polygon,'marker':level_marker})
 
 #       ________________________________________________________________
 #       ****************************************************************
-#       ***************************SECOND QUEST**************************
+#       ***************************SECOND QUEST*************************
 #       ****************************************************************
 
 @login_required(login_url='/login/')
@@ -115,10 +115,10 @@ def second(request):
     if not level_polygon:
         polygon = cache.get('polygons')
         if not polygon:
-            polygon = json.loads(json_polygons())
+            polygon = json_polygons()
             cache.set('polygons', polygon, timeout=None)
-        level_polygon = polygon
-        level_polygon['features'] = list(filter(lambda x: x['properties']['quest'] == quest and x['properties']['level'] == level, polygon['features']))
+        level_polygon = json.loads(polygon)
+        level_polygon['features'] = list(filter(lambda x: x['properties']['quest'] == quest and x['properties']['level'] == level, level_polygon['features']))
         cache.set(redis_key, level_polygon, timeout=None)
 
     redis_key = 'marker_{}_{}'.format(quest,level)
@@ -126,12 +126,12 @@ def second(request):
     if not level_marker:
         marker = cache.get('markers')
         if not marker:
-            marker = json.loads(json_markers())
-            cache.set(redis_key, marker, timeout=None)
-        level_marker = marker
-        level_marker['features'] = list(filter(lambda x: x['properties']['quest'] == quest and x['properties']['level'] < level, marker['features']))
+            marker = json_markers()
+            cache.set('markers', marker, timeout=None)
+        level_marker = json.loads(marker)
+        level_marker['features'] = list(filter(lambda x: x['properties']['quest'] == quest and x['properties']['level'] < level, level_marker['features']))
         cache.set(redis_key, level_marker, timeout=None)
 
     return render(request, 'second_quest.html', {
         'level':level, 'quest':quest, 'override':override, 'center':center, 'quests_count':len(all_quests),
-        'polygon':level_polygon,'marker':level_marker,'all_quests':all_quests})
+        'polygon':level_polygon,'marker':level_marker})

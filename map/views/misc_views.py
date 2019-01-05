@@ -8,27 +8,15 @@ from django.shortcuts import render, redirect
 @login_required(login_url='/login/')
 def quest_list(request):
     user = request.user
-    override = {'DEFAULT_ZOOM': 12,'TILES':[('Black','https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {'attribution': ''}),('Watercolor','http://{s}.tile.stamen.com/watercolor/{z}/{x}/{y}.jpg', {'attribution': ''})]}
-    redis_key = 'all_quests'
-    all_quests = cache.get(redis_key)
-    if not all_quests:
-        all_quests = [str(i) for i in range(1,Quest.objects.all().count()+1)]
-        cache.set(redis_key, all_quests, timeout=None)
+    override = {'DEFAULT_ZOOM': 12, 'MAX_ZOOM': 14, 'TILES':[('Black','https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {'attribution': ''}),('Watercolor','http://{s}.tile.stamen.com/watercolor/{z}/{x}/{y}.jpg', {'attribution': ''})]}
 
-    redis_key = 'quests_descs'
-    quests_descs = cache.get(redis_key)
-    if not quests_descs:
-        quests_descs = [0] + list(Quest.objects.all().values_list("description", flat=True))
-        cache.set(redis_key, quests_descs, timeout=None)
-    colors = ['white','green','red','blue','yellow','orange','purple','aqua','saddlebrown'][0:len(quests_descs)]
+    colors = ['white','green','red','blue','yellow','orange','purple','aqua','saddlebrown']
     redis_key = 'progress_{}'.format(user.username)
     progress = cache.get(redis_key)
     if not progress:
         progress = 0
 
-    quests_count = len(quests_descs)-1
-
-    return render(request, 'quest_list.html', {'override':override,'descs':quests_descs, 'quests_count':quests_count,'colors':colors,'progress':progress,'all_quests':all_quests})
+    return render(request, 'quest_list.html', {'override':override,'colors':colors,'progress':progress})
 
 @login_required(login_url='/login/')
 def levelUp(request, quest):
