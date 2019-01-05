@@ -71,17 +71,17 @@
 
         function getPoints(data){
             var features = data.features;
-            window.linePoints = [[]];
-            window.levels = [[]];
-            for (i = 1; i <= progress.length; i++){
-              linePoints.push([]);
-              levels.push(0);
+            window.linePoints = [{}];
+            window.levels = [{}];
+            for (i = 1; i < progress.length; i++){
+              linePoints.push({'id':progress[i].this_id,'points':[]});
+              levels.push({'id':progress[i].this_id,'levels':0});
             }
-            for (i = 0; i < features.length; i++) {
-              for (j = 1; j <= levels.length; j++){
-                if(features[i].properties.quest === j){
-                  linePoints[j].push(features[i].geometry.coordinates);
-                  levels[j] += 1;
+            for (i = 0; i < features.length; i++){
+              for (j = 1; j < levels.length; j++){
+                if (features[i].properties.quest === linePoints[j].id){
+                  linePoints[j].points.push(features[i].geometry.coordinates);
+                  levels[j].levels += 1;
                 } else {}
             }}}
 
@@ -97,16 +97,26 @@
             var descs = {{descs}}
             var colors = {{colors}}
             {% endautoescape %}
-            for(i=1;i<=linePoints.length;i++){
-            L.geoJSON({"type": "LineString","coordinates": linePoints[i]},
+            for(i=1;i<linePoints.length;i++){
+            L.geoJSON({"type": "LineString","coordinates": linePoints[i].points},
                 {style: {"color": colors[i], "weight": 15, "opacity": 0.65},
                 onEachFeature: function onEachFeature(feature, layer) {
                   if(progress[i] != undefined){
-                    var content = `<button id="closeButton">close</button><br><br>
-                    <h1>${progress[i].title}</h1><h4>TOTAL LEVELS: ${levels[i]}</h4>
-                    <p>${descs[i]}</p><h3>YOUR PROGRESS: ${progress[i].progress}
-                    ${progress[i].status[1]}</h3><a href="{% url 'quest_list' %}${i}/">
-                    <button>Go to ${progress[i].title}</button></a>`;
+                    var content = `
+                    <button id="closeButton">close</button><br><br>
+                    <h1>${progress[i].title}</h1>
+                    <h4>TOTAL LEVELS: ${levels[i].levels}</h4>
+                    <p>${progress[i].desc}</p>`
+                    if (progress[i].status[0] === 0){
+                      content += `<h3>YOUR PROGRESS: ${progress[i].progress}
+                                ${progress[i].status[1]}</h3>`
+                    } else {
+                      content += `<h3>PRICE: ${progress[i].progress}
+                                ${progress[i].status[1]}</h3>`
+                    }
+                    content += `<a href="{% url 'quest_list' %}${progress[i].this_id}/">
+                    <button>Go to ${progress[i].title}</button>
+                    </a>`;
                     layer.on('click', function(){
                         sidebar.show();
                         sidebar.setContent(content);

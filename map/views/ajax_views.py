@@ -46,7 +46,8 @@ def profile(request):
                 percents.append('')
                 quests_status.append([1,"{}$".format(prices[i-1]),'red'])
         titles = list(Quest.objects.values_list("title", flat=True))
-        progress = [{'title':titles[i], 'progress':percents[i], 'status':quests_status[i], 'this_id':this_id[i]} for i in range(0,len(titles))]
+        descs = list(Quest.objects.values_list("description", flat=True))
+        progress = [{'title':titles[i], 'progress':percents[i], 'status':quests_status[i], 'this_id':this_id[i], 'desc':descs[i]} for i in range(0,len(titles))]
         progress = [0] + sorted(progress, key=lambda k: k['status'][0])
         cache.set(redis_key, progress, timeout=60000)
     data = {
