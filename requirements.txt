@@ -11,3 +11,5 @@ django-redis-cache
 redis==2.10.6
 django-compressor==2.2
 psycopg2
+urllib3
+requests
