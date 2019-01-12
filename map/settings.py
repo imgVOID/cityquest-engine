@@ -118,7 +118,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": ["redis://h:pbb5fe3ba994a3566467c5a32aeb8cb7c3a91230580b341fa721d0288b2f95b20@ec2-18-215-97-111.compute-1.amazonaws.com:51009"],
+            "hosts": ["redis://redistogo:048d4187361fbb300d16fa57464ba192@tarpon.redistogo.com:10825/"],
         },
     },
 }  
