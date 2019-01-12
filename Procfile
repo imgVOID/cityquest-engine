@@ -1,1 +1,1 @@
-web: gunicorn cityquest-engine.wsgi --log-file -
+web: gunicorn map.wsgi --log-file -
