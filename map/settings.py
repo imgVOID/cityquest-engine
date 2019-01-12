@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 import os.path
-import urlparse
+from urllib.parse import urlparse
 from django.conf.global_settings import LOGIN_REDIRECT_URL
 import django_heroku
 
