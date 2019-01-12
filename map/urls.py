@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^1/$', views.first, name='1'),
     url(r'^2/$', views.second, name='2'),
     url(r'^levelUp/(?P<quest>\d+)/$', views.levelUp, name='levelUp'),
+    url(r'^levelDown/(?P<quest>\d+)/$', views.levelDown, name='levelDown'),
     url(r'^clear_cache/(?P<quest>\d+)/$', views.clear_cache, name='clear_cache'),
     url(r'^testreset/(?P<quest>\d+)/$', views.testreset, name='testreset'),
     url(r'^$', views.quest_list, name='quest_list'),

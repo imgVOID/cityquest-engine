@@ -42,9 +42,10 @@ window.logoutUrl = `{% url 'logout' %}`;
 
 
     <div class="user" id="users">{{ user.get_username }} {{level}}
-    <a href="{% url 'levelUp' quest=quest %}">LevelUp</a>
-    <a href="{% url 'clear_cache' quest=quest %}">Refresh page</a>
-    <a href="{% url 'testreset' quest=quest %}">Restart</a>
+    <a href="{% url 'levelUp' quest=quest %}">Level up</a>
+    <a href="{% url 'levelDown' quest=quest %}">Level down</a>
+    <a href="{% url 'testreset' quest=quest %}">Restart quest</a>
+    <a href="{% url 'clear_cache' quest=quest %}">Refresh cache</a>
     </div>
 
 

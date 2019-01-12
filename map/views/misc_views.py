@@ -23,17 +23,38 @@ def levelUp(request, quest):
     user = request.user
     name = str(quest)
     if user.is_authenticated:
-        if user.groups.filter(name=name):
-            level_field_str = 'id' + name
-            level = getattr(user.profile, level_field_str)
-            if level == 1:
-                setattr(user.profile, level_field_str, 2)
-                user.profile.save()
-                user.save()
-            elif level == 2:
-                setattr(user.profile, level_field_str, 1)
-                user.profile.save()
-                user.save()
+        max_level = Marker.objects.filter(quest=quest).count()
+        level_field_str = 'id' + name
+        level = getattr(user.profile, level_field_str)
+        if user.groups.filter(name=name) and level < max_level:
+            next_level = level + 1
+            setattr(user.profile, level_field_str, next_level)
+            user.profile.save()
+            user.save()
+            redis_key = make_template_fragment_key('mapdata',[quest,request.user.username])
+            cache.delete(redis_key)
+            redis_key = 'progress_{}'.format(user.username)
+            cache.delete(redis_key)
+            url = '/{}/'.format(quest)
+            return redirect(url)
+        else:
+            url = '/{}/'.format(quest)
+            return redirect(url)
+    else:
+        return redirect('/')
+
+@login_required(login_url='/login/')
+def levelDown(request, quest):
+    user = request.user
+    name = str(quest)
+    if user.is_authenticated:
+        level_field_str = 'id' + name
+        level = getattr(user.profile, level_field_str)
+        if user.groups.filter(name=name) and level > 1:
+            prev_level = level - 1
+            setattr(user.profile, level_field_str, prev_level)
+            user.profile.save()
+            user.save()
             redis_key = make_template_fragment_key('mapdata',[quest,request.user.username])
             cache.delete(redis_key)
             redis_key = 'progress_{}'.format(user.username)
