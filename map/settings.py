@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 import os.path
-import urllib.parse as urlparse
+import urllib
 from django.conf.global_settings import LOGIN_REDIRECT_URL
 import django_heroku
 
@@ -113,7 +113,7 @@ DATABASES = {
 }
 
 # redis heroku
-redis_url = urlparse(os.environ.get('REDISTOGO_URL', 'redis://localhost:6959'))
+redis_url = urllib.parse(os.environ.get('REDISTOGO_URL', 'redis://localhost:6959'))
 
 CACHES = {
     'default': {
