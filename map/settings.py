@@ -111,15 +111,18 @@ DATABASES = {
     }
 }
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "asgi_redis.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [os.environ.get('REDISCLOUD_URL', 'redis://localhost:6379')],
-        },
-        "ROUTING": "chat.routing.channel_routing",
-    },
-}
+# redis heroku
+redis_url = urlparse.urlparse(os.environ.get('REDISTOGO_URL', 'redis://localhost:6959'))
+
+CACHES = {
+    'default': {
+        'BACKEND': 'redis_cache.RedisCache',
+        'LOCATION': '%s:%s' % (redis_url.hostname, redis_url.port),
+        'OPTIONS': {
+            'DB': 0,
+            'PASSWORD': redis_url.password,
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
@@ -162,8 +165,6 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 GDAL_LIBRARY_PATH = os.environ.get('GDAL_LIBRARY_PATH')
 
 GEOS_LIBRARY_PATH = os.environ.get('GEOS_LIBRARY_PATH')
-
-redis_url = os.getenv('REDISTOGO_URL')
 
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
 
