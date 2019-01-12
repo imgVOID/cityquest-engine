@@ -113,15 +113,15 @@ DATABASES = {
 }
 
 # redis heroku
-redis_url = urllib.parse(os.environ.get('REDISTOGO_URL', 'redis://localhost:6959'))
+REDIS_URL = os.getenv('REDISTOGO_URL', 'redis://localhost:6379/0')
 
 CACHES = {
     'default': {
         'BACKEND': 'redis_cache.RedisCache',
-        'LOCATION': '%s:%s' % (redis_url.hostname, redis_url.port),
+        'LOCATION': '%s:%s' % (REDIS_URL.hostname, REDIS_URL.port),
         'OPTIONS': {
             'DB': 0,
-            'PASSWORD': redis_url.password,
+            'PASSWORD': REDIS_URL.password,
         }
     }
     }
