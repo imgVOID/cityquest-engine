@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 import os.path
+from urllib.parse import urljoin
 from django.conf.global_settings import LOGIN_REDIRECT_URL
 import django_heroku
 
@@ -112,16 +113,20 @@ DATABASES = {
 }
 
 # redis heroku
-REDIS_URL = os.getenv('REDISTOGO_URL', 'redis://localhost:6379/0')
 
+redis_host = os.environ.get('REDIS_HOST', 'localhost')    
+# Channel layer definitions
+# http://channels.readthedocs.org/en/latest/deploying.html#setting-up-a-channel-backend
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        # This example app uses the Redis channel layer implementation asgi_redis
+        "BACKEND": "asgi_redis.RedisChannelLayer",
         "CONFIG": {
-            "hosts": ["redis://redistogo:048d4187361fbb300d16fa57464ba192@tarpon.redistogo.com:10825/"],
+            "hosts": [(redis_host, 6379)],
         },
+        "ROUTING": "multichat.routing.channel_routing",
     },
-}  
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
