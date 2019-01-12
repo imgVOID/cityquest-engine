@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 import os
 import os.path
 from django.conf.global_settings import LOGIN_REDIRECT_URL
+import django_heroku
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -216,3 +217,6 @@ LEAFLET_CONFIG = {
 }
 
 GRAPPELLI_ADMIN_TITLE = 'CityQuest'
+
+# Activate Django-Heroku.
+django_heroku.settings(locals())

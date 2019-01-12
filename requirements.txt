@@ -1,5 +1,5 @@
 django==2.0
-gunicorn==19.9.0
+gunicorn
 django-guardian==1.4.9
 django-geojson
 django-leaflet
@@ -13,3 +13,4 @@ django-compressor==2.2
 psycopg2-binary
 urllib3
 requests
+django-heroku
