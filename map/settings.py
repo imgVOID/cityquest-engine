@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 import os.path
-from urllib.parse import urljoin
 from django.conf.global_settings import LOGIN_REDIRECT_URL
 import django_heroku
 
@@ -114,20 +113,6 @@ DATABASES = {
 
 # redis heroku
 
-redis_host = os.environ.get('REDIS_HOST', 'localhost')    
-# Channel layer definitions
-# http://channels.readthedocs.org/en/latest/deploying.html#setting-up-a-channel-backend
-CHANNEL_LAYERS = {
-    "default": {
-        # This example app uses the Redis channel layer implementation asgi_redis
-        "BACKEND": "asgi_redis.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [(redis_host, 6379)],
-        },
-        "ROUTING": "multichat.routing.channel_routing",
-    },
-}
-
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
 
@@ -189,10 +174,10 @@ COMPRESS_JS_FILTERS = [
 COMPRESS_ENABLED = False
 
 CACHES = {
-    'default': {
-        'BACKEND': 'redis_cache.RedisCache',
-        'LOCATION': '127.0.0.1:6379',
-    },
+    "default": {
+         "BACKEND": "redis_cache.RedisCache",
+         "LOCATION": os.environ.get('REDIS_URL'),
+    }
 }
 
 
